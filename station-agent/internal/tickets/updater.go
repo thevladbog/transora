@@ -15,10 +15,12 @@ func NewUpdater(cache *Cache) *Updater {
 }
 
 func (u *Updater) HandleMessage(msgType string, raw json.RawMessage) error {
-	if msgType != protocol.MsgTicketUsed {
+	switch msgType {
+	case protocol.MsgTicketUsed, protocol.MsgTicketIssued, protocol.MsgTicketRefunded:
+	default:
 		return nil
 	}
-	var payload protocol.TicketUsedPayload
+	var payload protocol.TicketEventPayload
 	if err := json.Unmarshal(raw, &payload); err != nil {
 		return err
 	}

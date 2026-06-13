@@ -16,8 +16,10 @@ const (
 	MsgPong          = "pong"
 	MsgSyncForce     = "sync.force"
 	MsgAgentStatus   = "agent.status"
-	MsgTicketUsed    = "ticket.used"
-	MsgAudioPlay     = "audio.play"
+	MsgTicketUsed     = "ticket.used"
+	MsgTicketIssued   = "ticket.issued"
+	MsgTicketRefunded = "ticket.refunded"
+	MsgAudioPlay      = "audio.play"
 )
 
 type SyncRequestPayload struct {
@@ -74,6 +76,9 @@ type TicketUsedPayload struct {
 	StationID     string `json:"stationId"`
 	ScannedAt     string `json:"scannedAt"`
 }
+
+// TicketEventPayload is an alias for ticket lifecycle WS events (issued, used, refunded).
+type TicketEventPayload = TicketUsedPayload
 
 type AudioPlayPayload struct {
 	AnnouncementID string `json:"announcementId"`

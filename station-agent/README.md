@@ -84,7 +84,7 @@ Offline responses include `scanResult` (`BOARDED`, `ALREADY_USED`, `WRONG_TRIP`,
 
 When core is offline, validated scans are buffered in SQLite and flushed via `POST /api/boarding/sync` on reconnect. On reconnect the agent also syncs ticket manifests for active trips (`OPEN`, `BOARDING`, `PLANNED`) when `boarding.sync_trips_on_connect` is true (default).
 
-While connected, core pushes `ticket.used` over WSS when any device scans a ticket online — the agent updates its local manifest immediately so other TSDs see `ALREADY_USED` without waiting for reconnect resync.
+While connected, core pushes `ticket.issued`, `ticket.used`, and `ticket.refunded` over WSS — the agent updates its local manifest immediately so TSDs see new sales, scans, and refunds without waiting for reconnect resync.
 
 Config:
 

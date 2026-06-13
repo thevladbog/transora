@@ -67,9 +67,9 @@ Outbox events use `scheduling.trip.*` subjects (e.g. `scheduling.trip.created`, 
 
 **Agent → core messages:** `sync.request`, `pong`, `agent.status`
 
-**Core → agent messages:** `sync.snapshot`, `trip.created`, `trip.updated`, `trip.cancelled`, `trip.delay_updated`, `ticket.used`, `ping`, `sync.force`
+**Core → agent messages:** `sync.snapshot`, `trip.created`, `trip.updated`, `trip.cancelled`, `trip.delay_updated`, `ticket.issued`, `ticket.used`, `ticket.refunded`, `audio.play`, `ping`, `sync.force`
 
-`ticket.used` payload: `{ ticketId, ticketNumber, tripId, status, passengerName, seatNumber, stationId, scannedAt }` — updates local ticket manifest when another device scans online.
+`ticket.issued` / `ticket.used` / `ticket.refunded` payload: `{ ticketId, ticketNumber, tripId, status, passengerName, seatNumber, stationId, scannedAt }` — incremental local manifest updates (sale, scan, refund) without full resync. `scannedAt` holds event timestamp (`issuedAt` or refund time for issued/refunded events).
 
 `sync.snapshot` payload: `{ stationId, generatedAt, version, trips[] }` where each trip includes `tripId`, `tripNumber`, `status`, `delayMinutes`, `displayTime`, `directionStop`, `platformNumber`, `stops[]`.
 

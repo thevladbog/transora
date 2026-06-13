@@ -157,14 +157,14 @@ flowchart TB
 
 | Пробел | Статус |
 |--------|--------|
-| `ticket.issued` / `sales.ticket.refunded` WS push | **Нет** (deferred; reconnect sync covers) |
+| `ticket.issued` / `sales.ticket.refunded` WS push | **Done** — outbox → departure-station agent (`ticket.issued`, `ticket.refunded`) |
 | Periodic `ping` from core | **Частично** — `sendPing()` есть, scheduler не вызывает |
 | `sync.force` trigger (admin/API) | **Частично** — method есть, wiring нет |
 | Audio commands over WS | **Частично** — `audio.play` implemented; `audio.stop` — follow-up |
 
-**Есть (core):** scan, sync, manifest, stats, `ticket.used` push.
+**Есть (core):** scan, sync, manifest, stats, `ticket.used` / `ticket.issued` / `ticket.refunded` push.
 
-**Go `station-agent/`** (отдельный процесс): skeleton + Phase 2–3 + ticket.used; **нет** PlaybackAgent, Prometheus, Windows service.
+**Go `station-agent/`** (отдельный процесс): skeleton + Phase 2–3 + ticket cache WS updates + PlaybackAgent; **нет** Prometheus, Windows service.
 
 ---
 
@@ -225,7 +225,7 @@ flowchart TB
 7. ~~**Documents quality**~~ — done (thermal 80mm, QR+CRC32, Code128 boarding, print_log, manifest filter ISSUED+USED)
 8. ~~**Notifications/TTS + PlaybackAgent**~~ — done (mock TTS, audio.play WS, departure scheduler, templates, display board register; Yandex/MinIO — follow-up)
 9. **Boarding App** (Android) — потребитель agent API, вне monolith
-10. **`ticket.issued` WS push** — incremental manifest без full resync
+10. ~~**`ticket.issued` WS push**~~ — done (incremental manifest: `ticket.issued`, `ticket.refunded`)
 
 ### P3 — platform
 
@@ -245,7 +245,7 @@ flowchart TB
 ## Верификация (на момент аудита)
 
 ```bash
-./gradlew test                    # 85 tests
+./gradlew test                    # 87 tests
 cd station-agent && go test ./... # Go agent tests
 ```
 

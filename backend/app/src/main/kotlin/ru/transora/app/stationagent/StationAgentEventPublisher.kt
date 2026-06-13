@@ -47,8 +47,12 @@ class StationAgentEventPublisher(
     }
 
     fun notifyTicketUsed(stationId: UUID, payload: TicketStatusPayload) {
+        notifyTicketEvent(stationId, "ticket.used", payload)
+    }
+
+    fun notifyTicketEvent(stationId: UUID, eventType: String, payload: TicketStatusPayload) {
         val session = sessionRegistry.getSession(stationId) ?: return
-        send(session, syncService.ticketStatusMessage("ticket.used", payload))
+        send(session, syncService.ticketStatusMessage(eventType, payload))
     }
 
     fun playAudio(stationId: UUID, payload: AudioPlayPayload) {

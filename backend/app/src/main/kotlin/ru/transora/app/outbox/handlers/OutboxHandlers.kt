@@ -19,6 +19,7 @@ import ru.transora.app.sales.ShiftSummaryRepository
 import ru.transora.app.sales.TicketRepository
 import ru.transora.sales.domain.FiscalReceiptType
 import ru.transora.app.stationagent.StationAgentEventPublisher
+import ru.transora.app.stationagent.StationAgentTicketPushService
 import ru.transora.app.stationagent.TicketStatusPayload
 import ru.transora.inventory.domain.TripInventoryStatus
 import ru.transora.app.outbox.OutboxEvent
@@ -229,6 +230,7 @@ class TripCompletedHandler(
 class LegacyTicketIssuedHandler(
     private val payloadReader: OutboxPayloadReader,
     private val ticketDocumentService: ru.transora.app.documents.TicketDocumentService,
+    private val stationAgentTicketPushService: StationAgentTicketPushService,
 ) : OutboxEventHandler {
     override val eventType: String = "ticket.issued"
 
@@ -236,6 +238,11 @@ class LegacyTicketIssuedHandler(
         val payload = payloadReader.readPayload(event)
         val ticketId = payloadReader.uuidValue(payload, "ticketId")
         ticketDocumentService.generateForTicket(ticketId)
+        stationAgentTicketPushService.pushTicketEvent(
+            ticketId = ticketId,
+            eventType = "ticket.issued",
+            eventAt = parseEventInstant(payload["issuedAt"]) ?: Clock.systemUTC().instant(),
+        )
     }
 }
 
@@ -243,6 +250,7 @@ class LegacyTicketIssuedHandler(
 class SalesTicketIssuedHandler(
     private val payloadReader: OutboxPayloadReader,
     private val ticketDocumentService: ru.transora.app.documents.TicketDocumentService,
+    private val stationAgentTicketPushService: StationAgentTicketPushService,
 ) : OutboxEventHandler {
     override val eventType: String = "sales.ticket.issued"
 
@@ -250,6 +258,11 @@ class SalesTicketIssuedHandler(
         val payload = payloadReader.readPayload(event)
         val ticketId = payloadReader.uuidValue(payload, "ticketId")
         ticketDocumentService.generateForTicket(ticketId)
+        stationAgentTicketPushService.pushTicketEvent(
+            ticketId = ticketId,
+            eventType = "ticket.issued",
+            eventAt = parseEventInstant(payload["issuedAt"]) ?: Clock.systemUTC().instant(),
+        )
     }
 }
 
@@ -287,6 +300,7 @@ class TicketUsedHandler(
 class SalesTicketRefundedHandler(
     private val payloadReader: OutboxPayloadReader,
     private val ticketDocumentService: ru.transora.app.documents.TicketDocumentService,
+    private val stationAgentTicketPushService: StationAgentTicketPushService,
 ) : OutboxEventHandler {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -302,6 +316,11 @@ class SalesTicketRefundedHandler(
         )
         runCatching { ticketDocumentService.generateVoidedTicket(ticketId) }
             .onFailure { ex -> log.warn("Void ticket document skipped for {}: {}", ticketId, ex.message) }
+        stationAgentTicketPushService.pushTicketEvent(
+            ticketId = ticketId,
+            eventType = "ticket.refunded",
+            eventAt = Clock.systemUTC().instant(),
+        )
     }
 }
 
@@ -590,6 +609,14 @@ class InventorySeatReleasedHandler(
         sideEffects.refreshBoard(tripId)
     }
 }
+
+private fun parseEventInstant(value: Any?): java.time.Instant? =
+    when (value) {
+        null -> null
+        is java.time.Instant -> value
+        is java.sql.Timestamp -> value.toInstant()
+        else -> runCatching { java.time.Instant.parse(value.toString()) }.getOrNull()
+    }
 
 private fun payloadToJson(payload: Map<String, Any?>): String {
     val entries = payload.entries.joinToString(",") { (key, value) ->
