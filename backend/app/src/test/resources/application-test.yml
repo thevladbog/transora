@@ -19,3 +19,6 @@ transora:
     poll-interval-ms: 500
   documents:
     storage-path: ${java.io.tmpdir}/transora-test-documents
+  notifications:
+    storage-path: ${java.io.tmpdir}/transora-test-audio
+    playback-poll-interval-ms: 60000

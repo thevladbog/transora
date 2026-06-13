@@ -142,14 +142,14 @@ flowchart TB
 
 | Пробел | Статус |
 |--------|--------|
-| TTS (Yandex/RHVoice), audio cache, MinIO | **Нет** |
-| Playback → station-agent (WS `audio.play`) | **Нет** на core и в Go agent |
-| Scheduled auto-announcements (−30/−15 min, arrival) | **Нет.** Только reactive (delay/cancel/gate) |
-| Announcement templates | **Нет** |
-| Queue semantics (priority, pause, caps, ad cap) | **Нет** |
-| Display board registration API | **Нет.** DB only |
+| TTS (Yandex/RHVoice), audio cache, MinIO | **Частично** — mock TTS + file cache (`MockTtsService`, WAV в `transora.notifications.storage-path`) |
+| Playback → station-agent (WS `audio.play`) | **Done** — `StationAgentEventPublisher.playAudio`, Go `playback.Agent` |
+| Scheduled auto-announcements (−30/−15 min, arrival) | **Частично** — job `DEPARTURE_30` / `DEPARTURE_15`; arrival — follow-up |
+| Announcement templates | **Done** — V22 `announcement_templates`, seed + GET `/api/announcements/templates` |
+| Queue semantics (priority, pause, caps, ad cap) | **Частично** — priority + `queue_paused` per station; caps/ad cap — follow-up |
+| Display board registration API | **Done** — `POST /api/display-boards/register`, heartbeat |
 
-**Есть:** board REST/WS, announcement CRUD, auto-enqueue on events, board refresh coordinator.
+**Есть:** board REST/WS, announcement CRUD, auto-enqueue on events, board refresh coordinator, mock TTS playback pipeline.
 
 ---
 
@@ -160,7 +160,7 @@ flowchart TB
 | `ticket.issued` / `sales.ticket.refunded` WS push | **Нет** (deferred; reconnect sync covers) |
 | Periodic `ping` from core | **Частично** — `sendPing()` есть, scheduler не вызывает |
 | `sync.force` trigger (admin/API) | **Частично** — method есть, wiring нет |
-| Audio commands over WS | **Нет** |
+| Audio commands over WS | **Частично** — `audio.play` implemented; `audio.stop` — follow-up |
 
 **Есть (core):** scan, sync, manifest, stats, `ticket.used` push.
 
@@ -223,7 +223,7 @@ flowchart TB
 ### P2 — продукт / клиенты
 
 7. ~~**Documents quality**~~ — done (thermal 80mm, QR+CRC32, Code128 boarding, print_log, manifest filter ISSUED+USED)
-8. **Notifications/TTS + PlaybackAgent** — audio pipeline
+8. ~~**Notifications/TTS + PlaybackAgent**~~ — done (mock TTS, audio.play WS, departure scheduler, templates, display board register; Yandex/MinIO — follow-up)
 9. **Boarding App** (Android) — потребитель agent API, вне monolith
 10. **`ticket.issued` WS push** — incremental manifest без full resync
 
@@ -245,8 +245,8 @@ flowchart TB
 ## Верификация (на момент аудита)
 
 ```bash
-./gradlew test                    # 80 tests
+./gradlew test                    # 85 tests
 cd station-agent && go test ./... # Go agent tests
 ```
 
-Следующий рекомендуемый блок — **P2 #8 Notifications/TTS + PlaybackAgent**.
+Следующий рекомендуемый блок — **P2 #9 Boarding App** (Android, вне monolith).

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Clock
+import java.time.Instant
 import java.util.UUID
 
 data class DisplayBoardRecord(
@@ -14,6 +15,8 @@ data class DisplayBoardRecord(
     val platformNumber: String?,
     val name: String,
     val isActive: Boolean,
+    val agentId: String? = null,
+    val lastSeenAt: Instant? = null,
 )
 
 @Repository
@@ -23,7 +26,7 @@ class DisplayBoardRepository(
     fun listActiveByStation(stationCode: String): List<DisplayBoardRecord> =
         jdbc.query(
             """
-            SELECT id, station_code, board_type, platform_number, name, is_active
+            SELECT id, station_code, board_type, platform_number, name, is_active, agent_id, last_seen_at
             FROM notifications.display_boards
             WHERE station_code = ? AND is_active = TRUE
             ORDER BY board_type, platform_number NULLS FIRST, name
@@ -35,7 +38,7 @@ class DisplayBoardRepository(
     fun findById(id: UUID): DisplayBoardRecord? =
         jdbc.query(
             """
-            SELECT id, station_code, board_type, platform_number, name, is_active
+            SELECT id, station_code, board_type, platform_number, name, is_active, agent_id, last_seen_at
             FROM notifications.display_boards
             WHERE id = ?
             """.trimIndent(),
@@ -43,21 +46,55 @@ class DisplayBoardRepository(
             id,
         ).firstOrNull()
 
+    fun findById(id: UUID, stationCode: String): DisplayBoardRecord? =
+        jdbc.query(
+            """
+            SELECT id, station_code, board_type, platform_number, name, is_active, agent_id, last_seen_at
+            FROM notifications.display_boards
+            WHERE id = ? AND station_code = ?
+            """.trimIndent(),
+            { rs, _ -> rs.toBoard() },
+            id,
+            stationCode.uppercase(),
+        ).firstOrNull()
+
+    fun findByAgentId(agentId: String): DisplayBoardRecord? =
+        jdbc.query(
+            """
+            SELECT id, station_code, board_type, platform_number, name, is_active, agent_id, last_seen_at
+            FROM notifications.display_boards
+            WHERE agent_id = ?
+            """.trimIndent(),
+            { rs, _ -> rs.toBoard() },
+            agentId,
+        ).firstOrNull()
+
     fun insert(board: DisplayBoardRecord) {
+        val now = Timestamp.from(Clock.systemUTC().instant())
         jdbc.update(
             """
             INSERT INTO notifications.display_boards (
-                id, station_code, board_type, platform_number, name, is_active, created_at
+                id, station_code, board_type, platform_number, name, is_active, agent_id, last_seen_at, created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """.trimIndent(),
             board.id,
-            board.stationCode,
+            board.stationCode.uppercase(),
             board.boardType,
             board.platformNumber,
             board.name,
             board.isActive,
+            board.agentId,
+            board.lastSeenAt?.let { Timestamp.from(it) } ?: now,
+            now,
+        )
+    }
+
+    fun touchLastSeen(id: UUID) {
+        jdbc.update(
+            "UPDATE notifications.display_boards SET last_seen_at = ? WHERE id = ?",
             Timestamp.from(Clock.systemUTC().instant()),
+            id,
         )
     }
 
@@ -82,5 +119,7 @@ class DisplayBoardRepository(
             platformNumber = getString("platform_number"),
             name = getString("name"),
             isActive = getBoolean("is_active"),
+            agentId = getString("agent_id"),
+            lastSeenAt = getTimestamp("last_seen_at")?.toInstant(),
         )
 }

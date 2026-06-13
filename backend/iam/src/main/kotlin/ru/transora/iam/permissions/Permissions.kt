@@ -19,6 +19,7 @@ object Permissions {
     const val BOARDING_SCAN = "boarding:scan"
     const val BOARDING_VIEW_STATS = "boarding:view_stats"
     const val ANNOUNCEMENTS_MANAGE = "announcements:manage_queue"
+    const val ANNOUNCEMENTS_PLAY_AUDIO = "announcements:play_audio"
     const val USERS_VIEW = "users:view"
     const val USERS_CREATE = "users:create"
     const val USERS_EDIT = "users:edit"
@@ -45,6 +46,7 @@ object RolePermissionMatrix {
         Permissions.INVENTORY_VIEW, Permissions.INVENTORY_TOGGLE, Permissions.INVENTORY_MANUAL_BLOCK,
         Permissions.INVENTORY_TRANSIT_GATE, Permissions.INVENTORY_CLOSE_TRANSIT_GATE, Permissions.DOCUMENTS_PRINT, Permissions.DOCUMENTS_VIEW_MANIFEST,
         Permissions.BOARDING_SCAN, Permissions.BOARDING_VIEW_STATS, Permissions.ANNOUNCEMENTS_MANAGE,
+        Permissions.ANNOUNCEMENTS_PLAY_AUDIO,
         Permissions.USERS_VIEW, Permissions.USERS_CREATE, Permissions.USERS_EDIT,
         Permissions.USERS_DEACTIVATE, Permissions.REPORTS_VIEW_STATION,
         Permissions.REPORTS_VIEW_NETWORK, Permissions.SETTINGS_MANAGE_TARIFFS,
@@ -75,7 +77,7 @@ object RolePermissionMatrix {
         RoleCodes.INSPECTOR -> setOf(
             Permissions.SCHEDULE_VIEW, Permissions.BOARDING_SCAN, Permissions.BOARDING_VIEW_STATS,
         )
-        RoleCodes.STATION_AGENT -> setOf(Permissions.BOARDING_SCAN)
+        RoleCodes.STATION_AGENT -> setOf(Permissions.BOARDING_SCAN, Permissions.ANNOUNCEMENTS_PLAY_AUDIO)
         else -> emptySet()
     }
 }

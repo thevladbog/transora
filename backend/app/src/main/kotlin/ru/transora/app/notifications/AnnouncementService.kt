@@ -13,12 +13,28 @@ class AnnouncementService(
     private val announcementRepository: AnnouncementRepository,
     private val serviceStationRepository: ServiceStationRepository,
     private val auditLogService: AuditLogService,
+    private val stationAnnouncementSettingsRepository: StationAnnouncementSettingsRepository,
+    private val announcementTemplateRepository: AnnouncementTemplateRepository,
 ) {
     fun listQueue(): AnnouncementQueueResponse {
         val stationCode = resolveStationCode()
         val items = announcementRepository.listQueue(stationCode).map { it.toResponse() }
-        return AnnouncementQueueResponse(stationCode = stationCode, items = items)
+        return AnnouncementQueueResponse(
+            stationCode = stationCode,
+            queuePaused = stationAnnouncementSettingsRepository.isQueuePaused(stationCode),
+            items = items,
+        )
     }
+
+    fun listTemplates(): List<AnnouncementTemplateResponse> =
+        announcementTemplateRepository.listActive().map {
+            AnnouncementTemplateResponse(
+                code = it.code,
+                name = it.name,
+                templateText = it.templateText,
+                priority = it.priority,
+            )
+        }
 
     fun get(id: UUID): AnnouncementResponse {
         val stationCode = resolveStationCode()
@@ -85,6 +101,18 @@ class AnnouncementService(
             entityType = "announcement",
             entityId = id.toString(),
         )
+    }
+
+    @Transactional
+    fun pauseQueue() {
+        val stationCode = resolveStationCode()
+        stationAnnouncementSettingsRepository.setQueuePaused(stationCode, paused = true)
+    }
+
+    @Transactional
+    fun resumeQueue() {
+        val stationCode = resolveStationCode()
+        stationAnnouncementSettingsRepository.setQueuePaused(stationCode, paused = false)
     }
 
     private fun resolveStationCode(): String {

@@ -17,6 +17,7 @@ const (
 	MsgSyncForce     = "sync.force"
 	MsgAgentStatus   = "agent.status"
 	MsgTicketUsed    = "ticket.used"
+	MsgAudioPlay     = "audio.play"
 )
 
 type SyncRequestPayload struct {
@@ -72,4 +73,11 @@ type TicketUsedPayload struct {
 	SeatNumber    int    `json:"seatNumber"`
 	StationID     string `json:"stationId"`
 	ScannedAt     string `json:"scannedAt"`
+}
+
+type AudioPlayPayload struct {
+	AnnouncementID string `json:"announcementId"`
+	AudioURL       string `json:"audioUrl"`
+	Priority       string `json:"priority"`
+	Text           string `json:"text"`
 }

@@ -51,6 +51,11 @@ class StationAgentEventPublisher(
         send(session, syncService.ticketStatusMessage("ticket.used", payload))
     }
 
+    fun playAudio(stationId: UUID, payload: AudioPlayPayload) {
+        val session = sessionRegistry.getSession(stationId) ?: return
+        send(session, syncService.audioPlayMessage(payload))
+    }
+
     private fun send(session: WebSocketSession, json: String) {
         runCatching {
             if (session.isOpen) {

@@ -61,4 +61,7 @@ class StationSyncService(
 
     fun ticketStatusMessage(eventType: String, payload: TicketStatusPayload): String =
         objectMapper.writeStationAgentMessage(eventType, payload)
+
+    fun audioPlayMessage(payload: AudioPlayPayload): String =
+        objectMapper.writeStationAgentMessage("audio.play", payload)
 }

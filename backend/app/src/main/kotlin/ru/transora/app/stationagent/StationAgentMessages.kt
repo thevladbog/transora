@@ -62,6 +62,13 @@ data class TicketStatusPayload(
     val scannedAt: String,
 )
 
+data class AudioPlayPayload(
+    val announcementId: String,
+    val audioUrl: String,
+    val priority: String,
+    val text: String,
+)
+
 fun StationBoardTrip.toSyncTripPayload(stops: List<TripStop>, version: Long): SyncTripPayload =
     SyncTripPayload(
         tripId = tripId.toString(),

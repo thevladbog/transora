@@ -18,6 +18,8 @@ import (
 	"github.com/transora/station-agent/internal/config"
 	"github.com/transora/station-agent/internal/core"
 	"github.com/transora/station-agent/internal/mode"
+	"github.com/transora/station-agent/internal/playback"
+	"github.com/transora/station-agent/internal/protocol"
 	"github.com/transora/station-agent/internal/tickets"
 	"github.com/transora/station-agent/internal/proxy"
 )
@@ -60,9 +62,11 @@ func main() {
 
 	updater := cache.NewUpdater(tripCache)
 	ticketUpdater := tickets.NewUpdater(ticketCache)
+	playbackAgent := playback.NewAgent()
 	messageHandler := &compositeHandler{
 		schedule: updater,
 		tickets:  ticketUpdater,
+		playback: playbackAgent,
 	}
 	coreProxy, err := proxy.New(cfg.Core.HTTPURL, modeManager, tokenProvider)
 	if err != nil {
@@ -145,9 +149,13 @@ func main() {
 type compositeHandler struct {
 	schedule *cache.Updater
 	tickets  *tickets.Updater
+	playback *playback.Agent
 }
 
 func (h *compositeHandler) HandleMessage(msgType string, raw json.RawMessage) error {
+	if msgType == protocol.MsgAudioPlay {
+		return h.playback.HandlePlay(raw)
+	}
 	if err := h.tickets.HandleMessage(msgType, raw); err != nil {
 		return err
 	}

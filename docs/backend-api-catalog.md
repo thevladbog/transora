@@ -134,11 +134,17 @@ Station scope enforced from JWT `station_id`.
 | GET | `/api/transit-gates?tripId=` | `inventory:open_transit_gate` | List transit gates for trip (station-scoped; all gates for superuser) |
 | POST | `/api/transit-gates/{gateId}/open` | `inventory:open_transit_gate` | Open transit sales after bus arrival (requires stop ARRIVED, seats AVAILABLE) |
 | POST | `/api/transit-gates/{gateId}/close` | `inventory:close_transit_gate` | Close transit sales after boarding completed |
-| GET | `/api/announcements/queue` | `announcements:manage_queue` | List announcement queue |
+| GET | `/api/announcements/queue` | `announcements:manage_queue` | List queue (`queuePaused` flag included) |
+| GET | `/api/announcements/templates` | `announcements:manage_queue` | List active announcement templates |
+| POST | `/api/announcements/queue/pause` | `announcements:manage_queue` | Pause playback for current station |
+| POST | `/api/announcements/queue/resume` | `announcements:manage_queue` | Resume playback for current station |
 | GET | `/api/announcements/{id}` | `announcements:manage_queue` | Get announcement |
-| POST | `/api/announcements` | `announcements:manage_queue` | Create announcement |
+| GET | `/api/announcements/{id}/audio` | `announcements:play_audio` | Download synthesized WAV (station-agent) |
+| POST | `/api/announcements` | `announcements:manage_queue` | Create announcement (queued → TTS → WS `audio.play`) |
 | PUT | `/api/announcements/{id}` | `announcements:manage_queue` | Update announcement |
 | DELETE | `/api/announcements/{id}` | `announcements:manage_queue` | Delete announcement |
+| POST | `/api/display-boards/register` | `announcements:manage_queue` | Register display board agent |
+| POST | `/api/display-boards/{id}/heartbeat` | `announcements:manage_queue` | Display board heartbeat |
 
 ## Boarding (Phase J)
 
