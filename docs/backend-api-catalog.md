@@ -67,9 +67,15 @@ Outbox events use `scheduling.trip.*` subjects (e.g. `scheduling.trip.created`, 
 
 **Agent → core messages:** `sync.request`, `pong`, `agent.status`
 
-**Core → agent messages:** `sync.snapshot`, `trip.created`, `trip.updated`, `trip.cancelled`, `trip.delay_updated`, `ticket.issued`, `ticket.used`, `ticket.refunded`, `audio.play`, `ping`, `sync.force`
+**Core → agent messages:** `sync.snapshot`, `trip.created`, `trip.updated`, `trip.cancelled`, `trip.delay_updated`, `ticket.issued`, `ticket.used`, `ticket.refunded`, `audio.play`, `audio.stop`, `ping`, `sync.force`
 
 `ticket.issued` / `ticket.used` / `ticket.refunded` payload: `{ ticketId, ticketNumber, tripId, status, passengerName, seatNumber, stationId, scannedAt }` — incremental local manifest updates (sale, scan, refund) without full resync. `scannedAt` holds event timestamp (`issuedAt` or refund time for issued/refunded events).
+
+`audio.stop` payload: `{ reason? }` — sent when dispatcher pauses announcement queue; agent clears local audio queue.
+
+`sync.force` payload: `{ stationId }` — agent responds with `sync.request`; core replies with `sync.snapshot`.
+
+Core sends `ping` every 30s (configurable via `transora.station-agent.ping-interval-ms`); agent replies with `pong`.
 
 `sync.snapshot` payload: `{ stationId, generatedAt, version, trips[] }` where each trip includes `tripId`, `tripNumber`, `status`, `delayMinutes`, `displayTime`, `directionStop`, `platformNumber`, `stops[]`.
 
@@ -145,6 +151,12 @@ Station scope enforced from JWT `station_id`.
 | DELETE | `/api/announcements/{id}` | `announcements:manage_queue` | Delete announcement |
 | POST | `/api/display-boards/register` | `announcements:manage_queue` | Register display board agent |
 | POST | `/api/display-boards/{id}/heartbeat` | `announcements:manage_queue` | Display board heartbeat |
+
+## Station agent ops (`/api/stations/{stationId}/agent`)
+
+| Method | Path | Permission | Description |
+|--------|------|------------|-------------|
+| POST | `/api/stations/{stationId}/agent/sync-force` | `announcements:manage_queue` | Force connected station-agent to resync schedule cache (`409` if offline) |
 
 ## Boarding (Phase J)
 

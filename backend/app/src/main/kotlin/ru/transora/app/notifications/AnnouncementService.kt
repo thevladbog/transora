@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional
 import ru.transora.app.admin.AuditLogService
 import ru.transora.app.iam.security.StationScope
 import ru.transora.app.scheduling.ServiceStationRepository
+import ru.transora.app.stationagent.StationAgentEventPublisher
 import java.time.Clock
 import java.util.UUID
 
@@ -15,6 +16,7 @@ class AnnouncementService(
     private val auditLogService: AuditLogService,
     private val stationAnnouncementSettingsRepository: StationAnnouncementSettingsRepository,
     private val announcementTemplateRepository: AnnouncementTemplateRepository,
+    private val stationAgentEventPublisher: StationAgentEventPublisher,
 ) {
     fun listQueue(): AnnouncementQueueResponse {
         val stationCode = resolveStationCode()
@@ -105,8 +107,10 @@ class AnnouncementService(
 
     @Transactional
     fun pauseQueue() {
+        val stationId = StationScope.requireStationId()
         val stationCode = resolveStationCode()
         stationAnnouncementSettingsRepository.setQueuePaused(stationCode, paused = true)
+        stationAgentEventPublisher.stopAudio(stationId)
     }
 
     @Transactional

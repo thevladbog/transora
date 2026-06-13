@@ -48,4 +48,9 @@ transora:
     storage-path: ${TRANSORA_AUDIO_PATH:./data/audio}
     playback-poll-interval-ms: 5000
     departure-scheduler-cron: "0 * * * * *"
+  station-agent:
+    sync-horizon-hours: 48
+    sync-window-before-min: 30
+    ping-interval-ms: 30000
+    ping-enabled: true
 

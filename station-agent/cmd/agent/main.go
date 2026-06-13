@@ -156,6 +156,9 @@ func (h *compositeHandler) HandleMessage(msgType string, raw json.RawMessage) er
 	if msgType == protocol.MsgAudioPlay {
 		return h.playback.HandlePlay(raw)
 	}
+	if msgType == protocol.MsgAudioStop {
+		return h.playback.HandleStop(raw)
+	}
 	if err := h.tickets.HandleMessage(msgType, raw); err != nil {
 		return err
 	}

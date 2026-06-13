@@ -36,9 +36,13 @@ class StationAgentEventPublisher(
         send(session, syncService.tripEventMessage(eventType, payload))
     }
 
-    fun sendSyncForce(stationId: UUID) {
-        val session = sessionRegistry.getSession(stationId) ?: return
-        send(session, syncService.snapshotMessage(stationId))
+    fun isAgentConnected(stationId: UUID): Boolean =
+        sessionRegistry.getSession(stationId) != null
+
+    fun sendSyncForce(stationId: UUID): Boolean {
+        val session = sessionRegistry.getSession(stationId) ?: return false
+        send(session, syncService.syncForceMessage(stationId))
+        return true
     }
 
     fun sendPing(stationId: UUID) {
@@ -58,6 +62,11 @@ class StationAgentEventPublisher(
     fun playAudio(stationId: UUID, payload: AudioPlayPayload) {
         val session = sessionRegistry.getSession(stationId) ?: return
         send(session, syncService.audioPlayMessage(payload))
+    }
+
+    fun stopAudio(stationId: UUID, reason: String = "queue_paused") {
+        val session = sessionRegistry.getSession(stationId) ?: return
+        send(session, syncService.audioStopMessage(AudioStopPayload(reason = reason)))
     }
 
     private fun send(session: WebSocketSession, json: String) {

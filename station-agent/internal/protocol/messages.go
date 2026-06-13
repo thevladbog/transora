@@ -20,6 +20,7 @@ const (
 	MsgTicketIssued   = "ticket.issued"
 	MsgTicketRefunded = "ticket.refunded"
 	MsgAudioPlay      = "audio.play"
+	MsgAudioStop      = "audio.stop"
 )
 
 type SyncRequestPayload struct {
@@ -85,4 +86,8 @@ type AudioPlayPayload struct {
 	AudioURL       string `json:"audioUrl"`
 	Priority       string `json:"priority"`
 	Text           string `json:"text"`
+}
+
+type AudioStopPayload struct {
+	Reason string `json:"reason,omitempty"`
 }

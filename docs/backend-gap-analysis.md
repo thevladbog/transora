@@ -158,9 +158,9 @@ flowchart TB
 | Пробел | Статус |
 |--------|--------|
 | `ticket.issued` / `sales.ticket.refunded` WS push | **Done** — outbox → departure-station agent (`ticket.issued`, `ticket.refunded`) |
-| Periodic `ping` from core | **Частично** — `sendPing()` есть, scheduler не вызывает |
-| `sync.force` trigger (admin/API) | **Частично** — method есть, wiring нет |
-| Audio commands over WS | **Частично** — `audio.play` implemented; `audio.stop` — follow-up |
+| Periodic `ping` from core | **Done** — `StationAgentPingJob` every 30s (configurable) |
+| `sync.force` trigger (admin/API) | **Done** — `POST /api/stations/{stationId}/agent/sync-force` |
+| Audio commands over WS | **Done** — `audio.play` + `audio.stop` on queue pause |
 
 **Есть (core):** scan, sync, manifest, stats, `ticket.used` / `ticket.issued` / `ticket.refunded` push.
 
@@ -245,7 +245,7 @@ flowchart TB
 ## Верификация (на момент аудита)
 
 ```bash
-./gradlew test                    # 87 tests
+./gradlew test                    # 91 tests
 cd station-agent && go test ./... # Go agent tests
 ```
 

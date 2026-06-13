@@ -47,4 +47,29 @@ func TestAudioPlayMessageTypeConstant(t *testing.T) {
 	if protocol.MsgAudioPlay != "audio.play" {
 		t.Fatalf("unexpected audio play message type: %s", protocol.MsgAudioPlay)
 	}
+	if protocol.MsgAudioStop != "audio.stop" {
+		t.Fatalf("unexpected audio stop message type: %s", protocol.MsgAudioStop)
+	}
+}
+
+func TestHandleStopClearsQueue(t *testing.T) {
+	agent := NewAgent()
+	raw := json.RawMessage(`{"reason":"queue_paused"}`)
+	if err := agent.HandlePlay(json.RawMessage(`{
+		"announcementId":"ann-1",
+		"audioUrl":"/api/announcements/ann-1/audio",
+		"priority":"HIGH",
+		"text":"Test"
+	}`)); err != nil {
+		t.Fatalf("HandlePlay: %v", err)
+	}
+	if agent.QueueLen() != 1 {
+		t.Fatalf("expected queue len 1 before stop, got %d", agent.QueueLen())
+	}
+	if err := agent.HandleStop(raw); err != nil {
+		t.Fatalf("HandleStop: %v", err)
+	}
+	if agent.QueueLen() != 0 {
+		t.Fatalf("expected empty queue after stop, got %d", agent.QueueLen())
+	}
 }

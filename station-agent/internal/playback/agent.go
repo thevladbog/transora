@@ -51,6 +51,26 @@ func (a *Agent) HandlePlay(raw json.RawMessage) error {
 	return nil
 }
 
+func (a *Agent) HandleStop(raw json.RawMessage) error {
+	var payload protocol.AudioStopPayload
+	if len(raw) > 0 && string(raw) != "null" {
+		if err := json.Unmarshal(raw, &payload); err != nil {
+			return err
+		}
+	}
+	cleared := a.ClearQueue()
+	log.Printf("audio stopped: reason=%s cleared=%d", payload.Reason, cleared)
+	return nil
+}
+
+func (a *Agent) ClearQueue() int {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	cleared := len(a.queue)
+	a.queue = nil
+	return cleared
+}
+
 func ParseAudioPlayPayload(raw json.RawMessage) (protocol.AudioPlayPayload, error) {
 	var payload protocol.AudioPlayPayload
 	err := json.Unmarshal(raw, &payload)

@@ -64,4 +64,10 @@ class StationSyncService(
 
     fun audioPlayMessage(payload: AudioPlayPayload): String =
         objectMapper.writeStationAgentMessage("audio.play", payload)
+
+    fun audioStopMessage(payload: AudioStopPayload): String =
+        objectMapper.writeStationAgentMessage("audio.stop", payload)
+
+    fun syncForceMessage(stationId: UUID): String =
+        objectMapper.writeStationAgentMessage("sync.force", SyncForcePayload(stationId = stationId.toString()))
 }

@@ -86,6 +86,8 @@ When core is offline, validated scans are buffered in SQLite and flushed via `PO
 
 While connected, core pushes `ticket.issued`, `ticket.used`, and `ticket.refunded` over WSS — the agent updates its local manifest immediately so TSDs see new sales, scans, and refunds without waiting for reconnect resync.
 
+Core also sends periodic `ping` (default 30s), `sync.force` (via `POST /api/stations/{stationId}/agent/sync-force` on core), and `audio.stop` when the announcement queue is paused.
+
 Config:
 
 ```yaml

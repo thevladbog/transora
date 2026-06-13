@@ -6,4 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class StationAgentProperties(
     val syncHorizonHours: Int = 48,
     val syncWindowBeforeMin: Int = 30,
+    val pingIntervalMs: Long = 30_000,
+    val pingEnabled: Boolean = true,
 )
