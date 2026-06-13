@@ -1,0 +1,6 @@
+# Shared frontend ignores (apps may extend locally)
+node_modules/
+dist/
+dist-ssr/
+*.local
+*.tsbuildinfo

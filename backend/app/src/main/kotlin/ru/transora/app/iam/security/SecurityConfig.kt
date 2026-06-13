@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -20,11 +21,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val serviceTokenAuthenticationFilter: ServiceTokenAuthenticationFilter,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val devCorsConfigurationSource: org.springframework.beans.factory.ObjectProvider<CorsConfigurationSource>,
 ) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http
             .csrf { it.disable() }
+            .cors { cors ->
+                devCorsConfigurationSource.ifAvailable { cors.configurationSource(it) }
+            }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth

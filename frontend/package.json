@@ -1,0 +1,19 @@
+{
+  "name": "transora-frontend",
+  "private": true,
+  "packageManager": "pnpm@11.5.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=11.5.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @transora/admin dev",
+    "build": "pnpm --filter @transora/admin build",
+    "api:fetch": "curl -sf http://localhost:8080/v3/api-docs -o openapi/transora.openapi.json",
+    "api:generate": "node ./node_modules/orval/dist/bin/orval.js --config packages/api-client/orval.config.ts",
+    "api:sync": "pnpm api:fetch && pnpm api:generate"
+  },
+  "devDependencies": {
+    "orval": "8.14.0"
+  }
+}
