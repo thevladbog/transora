@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+transora:
+  dev:
+    seed-data: true
+  iam:
+    seed-data: true

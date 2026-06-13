@@ -10,7 +10,26 @@ data class Reservation(
     val status: ReservationStatus,
     val expiresAt: Instant,
     val createdAt: Instant,
+    val sessionId: String? = null,
+    val fromStopOrder: Int? = null,
+    val toStopOrder: Int? = null,
+    val inventoryId: UUID? = null,
 )
+
+data class TripInventory(
+    val id: UUID,
+    val tripId: UUID,
+    val totalSeats: Int,
+    val status: TripInventoryStatus,
+    val createdAt: Instant,
+)
+
+enum class TripInventoryStatus {
+    INITIALIZING,
+    ACTIVE,
+    FROZEN,
+    REACCOMMODATING,
+}
 
 enum class ReservationStatus {
     ACTIVE,

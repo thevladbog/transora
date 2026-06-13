@@ -1,0 +1,19 @@
+agent:
+  station_id: "00000000-0000-0000-0000-000000000001"
+  listen: ":8081"
+
+core:
+  websocket_url: "ws://backend:8080/ws/stations"
+  http_url: "http://backend:8080"
+  login: "station_agent"
+  password: "station_agent"
+
+schedule_cache:
+  db_path: "/app/data/schedule_cache.db"
+  horizon_hours: 48
+
+boarding:
+  buffer_db_path: "/app/data/boarding_buffer.db"
+  ticket_cache_db_path: "/app/data/ticket_cache.db"
+  flush_batch_size: 100
+  sync_trips_on_connect: true

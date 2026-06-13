@@ -1,0 +1,21 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  task:
+    scheduling:
+      enabled: false
+
+transora:
+  dev:
+    seed-data: false
+  iam:
+    seed-data: false
+  outbox:
+    poll-interval-ms: 500
+  documents:
+    storage-path: ${java.io.tmpdir}/transora-test-documents

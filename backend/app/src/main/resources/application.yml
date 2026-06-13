@@ -1,6 +1,10 @@
 spring:
   application:
     name: transora-core
+  data:
+    redis:
+      host: ${TRANSORA_REDIS_HOST:localhost}
+      port: ${TRANSORA_REDIS_PORT:6379}
   datasource:
     url: ${TRANSORA_DB_URL:jdbc:postgresql://localhost:5432/transora}
     username: ${TRANSORA_DB_USERNAME:transora}
@@ -18,4 +22,26 @@ management:
 
 server:
   port: ${TRANSORA_HTTP_PORT:8080}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+transora:
+  iam:
+    seed-data: false
+  outbox:
+    poll-interval-ms: 1000
+  documents:
+    storage-path: ${TRANSORA_DOCUMENTS_PATH:./data/documents}
+  hardware:
+    base-url: ${TRANSORA_HARDWARE_URL:}
+    agent-token: ${TRANSORA_HARDWARE_TOKEN:dev-agent-token}
+  scheduling:
+    generation-horizon-days: 60
+    generation-cron: "0 0 2 * * *"
+    lifecycle-auto-advance: false
+  board:
+    window-before-min: 30
+    window-after-min: 180
 

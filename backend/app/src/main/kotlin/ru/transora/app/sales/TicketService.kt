@@ -2,56 +2,39 @@ package ru.transora.app.sales
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import ru.transora.app.inventory.ReservationService
-import ru.transora.app.outbox.OutboxEventRepository
 import ru.transora.sales.domain.Ticket
-import ru.transora.sales.domain.TicketStatus
-import java.time.Clock
 import java.util.UUID
 
 @Service
 class TicketService(
-    private val reservationService: ReservationService,
-    private val shiftRepository: ShiftRepository,
+    private val ticketSaleOrchestrator: TicketSaleOrchestrator,
     private val ticketRepository: TicketRepository,
-    private val outboxEventRepository: OutboxEventRepository,
 ) {
     @Transactional
     fun issue(request: IssueTicketRequest): Ticket {
-        val shiftId = requireNotNull(request.shiftId)
-        shiftRepository.findOpenByIdForUpdate(shiftId)
-            ?: throw NoSuchElementException("Open shift $shiftId was not found")
-
-        val reservation = reservationService.consume(requireNotNull(request.reservationId))
-        val ticket = Ticket(
-            id = UUID.randomUUID(),
-            reservationId = reservation.id,
-            shiftId = shiftId,
-            tripId = reservation.tripId,
-            seatNumber = reservation.seatNumber,
-            passengerName = request.passengerName.trim(),
-            priceCents = request.priceCents,
-            status = TicketStatus.ISSUED,
-            issuedAt = Clock.systemUTC().instant(),
+        val result = ticketSaleOrchestrator.completeFromReservation(
+            shiftId = requireNotNull(request.shiftId),
+            reservationId = requireNotNull(request.reservationId),
+            passengerName = request.passengerName,
+            docType = request.docType,
+            docNumber = request.docNumber,
+            paymentType = request.paymentType,
         )
-
-        ticketRepository.insert(ticket)
-        outboxEventRepository.append(
-            aggregateType = "ticket",
-            aggregateId = ticket.id.toString(),
-            eventType = "ticket.issued",
-            payload = mapOf(
-                "ticketId" to ticket.id,
-                "reservationId" to ticket.reservationId,
-                "shiftId" to ticket.shiftId,
-                "tripId" to ticket.tripId,
-                "seatNumber" to ticket.seatNumber,
-                "passengerName" to ticket.passengerName,
-                "priceCents" to ticket.priceCents,
-                "issuedAt" to ticket.issuedAt,
-            ),
-        )
-
-        return ticket
+        return result.ticket
     }
+
+    fun getById(id: UUID): Ticket =
+        ticketRepository.findById(id) ?: throw NoSuchElementException("Ticket $id was not found")
+
+    fun listByTripId(tripId: UUID): List<Ticket> =
+        ticketRepository.listByTripId(tripId)
 }
+
+data class IssueTicketRequest(
+    val reservationId: UUID?,
+    val shiftId: UUID?,
+    val passengerName: String,
+    val docType: String,
+    val docNumber: String,
+    val paymentType: String = "CASH",
+)

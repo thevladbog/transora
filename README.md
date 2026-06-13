@@ -33,8 +33,18 @@ docker compose up -d postgres
 Run the backend:
 
 ```bash
-./gradlew :backend:app:bootRun
+./gradlew :backend:app:bootRun --args='--spring.profiles.active=dev'
 ```
+
+Or start PostgreSQL and backend together:
+
+```bash
+docker compose up -d
+```
+
+API documentation (Scalar): http://localhost:8080/docs
+
+OpenAPI spec: http://localhost:8080/v3/api-docs
 
 Health endpoint:
 
@@ -92,11 +102,14 @@ Issue a ticket from an active reservation:
 ```bash
 curl -X POST http://localhost:8080/api/tickets \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -d '{
     "reservationId": "replace-with-reservation-id",
     "shiftId": "replace-with-shift-id",
     "passengerName": "Ivan Petrov",
-    "priceCents": 125000
+    "docType": "PASSPORT_RF",
+    "docNumber": "4510 123456",
+    "paymentType": "CASH"
   }'
 ```
 
@@ -104,4 +117,16 @@ Close a cashier shift:
 
 ```bash
 curl -X POST http://localhost:8080/api/shifts/replace-with-shift-id/close
+```
+
+List departure board:
+
+```bash
+curl "http://localhost:8080/api/board/departures?stationCode=T1"
+```
+
+Download ticket PDF:
+
+```bash
+curl http://localhost:8080/api/tickets/replace-with-ticket-id/document -o ticket.pdf
 ```

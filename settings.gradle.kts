@@ -27,4 +27,7 @@ include(
     ":backend:sales",
     ":backend:documents",
     ":backend:notifications",
+    ":backend:boarding",
+    ":backend:admin",
+    ":hardware-agent",
 )
