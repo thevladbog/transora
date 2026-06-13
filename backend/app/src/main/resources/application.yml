@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: transora-core
+  datasource:
+    url: ${TRANSORA_DB_URL:jdbc:postgresql://localhost:5432/transora}
+    username: ${TRANSORA_DB_USERNAME:transora}
+    password: ${TRANSORA_DB_PASSWORD:transora}
+  flyway:
+    enabled: true
+    schemas: app,iam,scheduling,inventory,sales,documents,notifications
+    default-schema: app
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+server:
+  port: ${TRANSORA_HTTP_PORT:8080}
+

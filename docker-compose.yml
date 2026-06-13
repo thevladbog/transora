@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18.4
+    container_name: transora-postgres
+    environment:
+      POSTGRES_DB: transora
+      POSTGRES_USER: transora
+      POSTGRES_PASSWORD: transora
+    ports:
+      - "5432:5432"
+    volumes:
+      - transora-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U transora -d transora"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  transora-postgres-data:
