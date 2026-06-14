@@ -68,7 +68,8 @@ class TripService(
             throw DomainRuleViolation("Trip cannot be created for a past date (BR-SCH-021)")
         }
 
-        val tripNumber = request.tripNumber.trim()
+        val tripNumber = request.tripNumber?.trim()?.takeIf { it.isNotEmpty() }
+            ?: routeWithStops.route.routeNumber
         if (tripRepository.existsByRouteDateTripNumber(request.routeId, request.tripDate, tripNumber)) {
             throw DomainRuleViolation("Trip $tripNumber already exists on ${request.tripDate} for this route")
         }
@@ -91,10 +92,10 @@ class TripService(
         request.driverId?.let { driverRepository.findById(it) ?: throw NoSuchElementException("Driver $it not found") }
 
         val initialStatus = when {
-            request.openSales && request.vehicleId != null -> TripStatus.OPEN
+            request.openSales == true && request.vehicleId != null -> TripStatus.OPEN
             else -> TripStatus.PLANNED
         }
-        if (request.openSales && request.vehicleId == null) {
+        if (request.openSales == true && request.vehicleId == null) {
             throw DomainRuleViolation("Vehicle is required to open sales (BR-SCH-023)")
         }
 
@@ -455,10 +456,10 @@ data class TripListFilter(
 data class CreateTripFromRouteRequest(
     val routeId: UUID,
     val tripDate: LocalDate,
-    val tripNumber: String,
+    val tripNumber: String? = null,
     val departureTime: LocalTime,
     val vehicleId: UUID? = null,
     val driverId: UUID? = null,
     val platform: String? = null,
-    val openSales: Boolean = false,
+    val openSales: Boolean? = null,
 )

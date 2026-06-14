@@ -10,6 +10,8 @@
   "routeId": "ID маршрута (UUID)",
   "validFrom": "Действует с",
   "validTo": "Действует до",
+  "validPeriod": "Период действия",
+  "invalidDateRange": "Дата окончания не может быть раньше даты начала",
   "refundPolicy": "Политика возврата",
   "noRefundPolicy": "Без политики",
   "isActive": "Активен",

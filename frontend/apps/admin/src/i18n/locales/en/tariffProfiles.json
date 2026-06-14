@@ -10,6 +10,8 @@
   "routeId": "Route ID (UUID)",
   "validFrom": "Valid from",
   "validTo": "Valid to",
+  "validPeriod": "Validity period",
+  "invalidDateRange": "End date cannot be before start date",
   "refundPolicy": "Refund policy",
   "noRefundPolicy": "None",
   "isActive": "Active",

@@ -214,6 +214,22 @@ Station scope enforced from JWT `station_id`.
 | PUT | `/api/admin/refund-policies/{id}` | `settings:manage_tariffs` | Update refund policy |
 | DELETE | `/api/admin/refund-policies/{id}` | `settings:manage_tariffs` | Delete refund policy |
 
+## Admin Route Pricing (`/api/admin/route-pricing`)
+
+Unified route editor: scheduling route + tariff profile stops/matrix + commerce policies + OSRM distance.
+
+| Method | Path | Permission | Description |
+|--------|------|------------|-------------|
+| GET | `/api/admin/route-pricing` | `schedule:view` | List routes: code, routeNumber, name, carrier, stop/matrix counts |
+| GET | `/api/admin/route-pricing/{routeId}` | `schedule:view` | Full bundle: meta, stops, matrix cells, policies context, distanceKm/legs |
+| POST | `/api/admin/route-pricing` | `settings:manage_tariffs` | Create route + auto tariff profile |
+| PUT | `/api/admin/route-pricing/{routeId}` | `settings:manage_tariffs` | Update meta (code, routeNumber, name, validFrom/To, isActive) |
+| PUT | `/api/admin/route-pricing/{routeId}/stops` | `settings:manage_tariffs` | Sync `route_stops` + `tariff_profile_stops` from point IDs |
+| PUT | `/api/admin/route-pricing/{routeId}/matrix` | `settings:manage_tariffs` | Upsert tariff matrix cells |
+| DELETE | `/api/admin/route-pricing/{routeId}` | `settings:manage_tariffs` | Deactivate route |
+
+`POST /api/trips/from-route`: `tripNumber` optional — defaults to `route.routeNumber` when omitted.
+
 ## System
 
 | Method | Path | Auth | Description |

@@ -51,6 +51,7 @@ data class RouteSummaryResponse(
     val carrierId: String,
     val name: String,
     val code: String?,
+    val routeNumber: String,
     val isActive: Boolean,
 )
 
@@ -59,6 +60,7 @@ data class RouteDetailResponse(
     val carrierId: String,
     val name: String,
     val code: String?,
+    val routeNumber: String,
     val description: String?,
     val isActive: Boolean,
     val stops: List<RouteStopResponse>,
@@ -69,6 +71,7 @@ data class RouteStopResponse(
     val stopOrder: Int,
     val stopName: String,
     val stationId: String?,
+    val pointId: String?,
     val isExternal: Boolean,
     val scheduledDurationMin: Int?,
     val dwellTimeMin: Int,
@@ -79,6 +82,7 @@ private fun Route.toSummaryResponse() = RouteSummaryResponse(
     carrierId = carrierId.toString(),
     name = name,
     code = code,
+    routeNumber = routeNumber,
     isActive = isActive,
 )
 
@@ -87,6 +91,7 @@ private fun RouteWithStops.toDetailResponse() = RouteDetailResponse(
     carrierId = route.carrierId.toString(),
     name = route.name,
     code = route.code,
+    routeNumber = route.routeNumber,
     description = route.description,
     isActive = route.isActive,
     stops = stops.map { it.toResponse() },
@@ -97,6 +102,7 @@ private fun RouteStop.toResponse() = RouteStopResponse(
     stopOrder = stopOrder,
     stopName = stopName,
     stationId = stationId?.toString(),
+    pointId = pointId?.toString(),
     isExternal = isExternal,
     scheduledDurationMin = scheduledDurationMin,
     dwellTimeMin = dwellTimeMin,

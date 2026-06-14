@@ -17,14 +17,15 @@ class RouteRepository(
         jdbc.update(
             """
             INSERT INTO scheduling.routes (
-                id, carrier_id, name, code, description, is_active, created_at, updated_at
+                id, carrier_id, name, code, route_number, description, is_active, created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """.trimIndent(),
             route.id,
             route.carrierId,
             route.name,
             route.code,
+            route.routeNumber,
             route.description,
             route.isActive,
             Timestamp.from(route.createdAt),
@@ -36,16 +37,17 @@ class RouteRepository(
         jdbc.update(
             """
             INSERT INTO scheduling.route_stops (
-                id, route_id, stop_order, stop_name, station_id, is_external,
+                id, route_id, stop_order, stop_name, station_id, point_id, is_external,
                 scheduled_duration_min, dwell_time_min
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """.trimIndent(),
             stop.id,
             stop.routeId,
             stop.stopOrder,
             stop.stopName,
             stop.stationId,
+            stop.pointId,
             stop.isExternal,
             stop.scheduledDurationMin,
             stop.dwellTimeMin,
@@ -84,11 +86,12 @@ class RouteRepository(
         jdbc.update(
             """
             UPDATE scheduling.routes
-            SET name = ?, code = ?, description = ?, is_active = ?, updated_at = ?
+            SET name = ?, code = ?, route_number = ?, description = ?, is_active = ?, updated_at = ?
             WHERE id = ?
             """.trimIndent(),
             route.name,
             route.code,
+            route.routeNumber,
             route.description,
             route.isActive,
             Timestamp.from(route.updatedAt),
@@ -126,6 +129,7 @@ class RouteRepository(
             carrierId = getObject("carrier_id", UUID::class.java),
             name = getString("name"),
             code = getString("code"),
+            routeNumber = getString("route_number"),
             description = getString("description"),
             isActive = getBoolean("is_active"),
             createdAt = getTimestamp("created_at").toInstant(),
@@ -139,6 +143,7 @@ class RouteRepository(
             stopOrder = getInt("stop_order"),
             stopName = getString("stop_name"),
             stationId = getObject("station_id") as UUID?,
+            pointId = getObject("point_id") as UUID?,
             isExternal = getBoolean("is_external"),
             scheduledDurationMin = getObject("scheduled_duration_min") as Int?,
             dwellTimeMin = getInt("dwell_time_min"),

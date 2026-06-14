@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Input } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 import type { TariffCellRequest, TariffProfileStopResponse } from '@transora/api-client';
@@ -38,6 +38,17 @@ export function TariffMatrixGrid({ stops, initialCells, onSave, isPending }: Tar
     });
     return set;
   });
+
+  useEffect(() => {
+    setCells(initialMap);
+    setOverrides(() => {
+      const set = new Set<CellKey>();
+      initialCells.forEach((cell) => {
+        if (cell.isMirrorOverride) set.add(cellKey(cell.fromStopOrder, cell.toStopOrder));
+      });
+      return set;
+    });
+  }, [initialMap, initialCells]);
 
   function getPrice(from: number, to: number): string {
     return cells.get(cellKey(from, to))?.price ?? '';

@@ -23,15 +23,21 @@ class RouteService(
     fun create(request: CreateRouteRequest): RouteWithStops {
         carrierRepository.findById(request.carrierId)
             ?: throw NoSuchElementException("Carrier ${request.carrierId} was not found")
-        validateStops(request.stops)
+        if (request.stops.isNotEmpty()) {
+            validateStops(request.stops)
+        }
 
         val now = Clock.systemUTC().instant()
         val routeId = UUID.randomUUID()
+        val routeNumber = request.routeNumber.trim().ifBlank {
+            request.code?.trim()?.takeIf { it.isNotEmpty() } ?: request.name.trim()
+        }
         val route = Route(
             id = routeId,
             carrierId = request.carrierId,
             name = request.name.trim(),
             code = request.code?.trim()?.takeIf { it.isNotEmpty() },
+            routeNumber = routeNumber,
             description = request.description?.trim(),
             isActive = true,
             createdAt = now,
@@ -40,16 +46,7 @@ class RouteService(
         routeRepository.insert(route)
 
         val stops = request.stops.map { stopRequest ->
-            val stop = RouteStop(
-                id = UUID.randomUUID(),
-                routeId = routeId,
-                stopOrder = stopRequest.stopOrder,
-                stopName = stopRequest.stopName.trim(),
-                stationId = stopRequest.stationId,
-                isExternal = stopRequest.isExternal,
-                scheduledDurationMin = stopRequest.scheduledDurationMin,
-                dwellTimeMin = stopRequest.dwellTimeMin,
-            )
+            val stop = stopRequest.toRouteStop(routeId)
             routeRepository.insertStop(stop)
             stop
         }
@@ -72,6 +69,7 @@ class RouteService(
         val updatedRoute = existing.route.copy(
             name = request.name?.trim()?.takeIf { it.isNotEmpty() } ?: existing.route.name,
             code = request.code ?: existing.route.code,
+            routeNumber = request.routeNumber?.trim()?.takeIf { it.isNotEmpty() } ?: existing.route.routeNumber,
             description = request.description ?: existing.route.description,
             isActive = request.isActive ?: existing.route.isActive,
             updatedAt = now,
@@ -79,19 +77,12 @@ class RouteService(
         routeRepository.update(updatedRoute)
 
         val stops = if (request.stops != null) {
-            validateStops(request.stops)
+            if (request.stops.isNotEmpty()) {
+                validateStops(request.stops)
+            }
             routeRepository.deleteStops(id)
             request.stops.map { stopRequest ->
-                val stop = RouteStop(
-                    id = UUID.randomUUID(),
-                    routeId = id,
-                    stopOrder = stopRequest.stopOrder,
-                    stopName = stopRequest.stopName.trim(),
-                    stationId = stopRequest.stationId,
-                    isExternal = stopRequest.isExternal,
-                    scheduledDurationMin = stopRequest.scheduledDurationMin,
-                    dwellTimeMin = stopRequest.dwellTimeMin,
-                )
+                val stop = stopRequest.toRouteStop(id)
                 routeRepository.insertStop(stop)
                 stop
             }
@@ -122,12 +113,26 @@ class RouteService(
             throw DomainRuleViolation("Non-external stop '${it.stopName}' must have a station")
         }
     }
+
+    private fun RouteStopRequest.toRouteStop(routeId: UUID): RouteStop =
+        RouteStop(
+            id = UUID.randomUUID(),
+            routeId = routeId,
+            stopOrder = stopOrder,
+            stopName = stopName.trim(),
+            stationId = stationId,
+            pointId = pointId,
+            isExternal = isExternal,
+            scheduledDurationMin = scheduledDurationMin,
+            dwellTimeMin = dwellTimeMin,
+        )
 }
 
 data class RouteStopRequest(
     val stopOrder: Int,
     val stopName: String,
     val stationId: UUID? = null,
+    val pointId: UUID? = null,
     val isExternal: Boolean = false,
     val scheduledDurationMin: Int? = null,
     val dwellTimeMin: Int = 5,
@@ -137,13 +142,15 @@ data class CreateRouteRequest(
     val carrierId: UUID,
     val name: String,
     val code: String? = null,
+    val routeNumber: String = "",
     val description: String? = null,
-    val stops: List<RouteStopRequest>,
+    val stops: List<RouteStopRequest> = emptyList(),
 )
 
 data class UpdateRouteRequest(
     val name: String? = null,
     val code: String? = null,
+    val routeNumber: String? = null,
     val description: String? = null,
     val isActive: Boolean? = null,
     val stops: List<RouteStopRequest>? = null,

@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { Input, Label, ListBox, Select, TextField } from '@heroui/react';
+import { Input, Label, ListBox, NumberField, Select, TextField } from '@heroui/react';
 
 const fieldInputProps = {
   fullWidth: true,
@@ -18,6 +18,50 @@ export function FormTextField({ label, inputProps, className, ...props }: FormTe
       <Label>{label}</Label>
       <Input {...fieldInputProps} {...inputProps} />
     </TextField>
+  );
+}
+
+type FormNumberFieldProps = Omit<ComponentProps<typeof NumberField>, 'children' | 'value' | 'onChange'> & {
+  label: ReactNode;
+  value: string;
+  onChange: (value: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+};
+
+/** Number input via HeroUI NumberField; value/onChange use string for form state compatibility. */
+export function FormNumberField({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  className,
+  ...props
+}: FormNumberFieldProps) {
+  const parsed = value === '' ? undefined : Number(value);
+  const numericValue = parsed !== undefined && !Number.isNaN(parsed) ? parsed : undefined;
+
+  return (
+    <div className={['transora-form-field space-y-1', className].filter(Boolean).join(' ')}>
+      <Label>{label}</Label>
+      <NumberField
+        variant="secondary"
+        fullWidth
+        value={numericValue}
+        minValue={min}
+        maxValue={max}
+        step={step}
+        onChange={(next) => onChange(String(next))}
+        {...props}
+      >
+        <NumberField.Group>
+          <NumberField.Input />
+        </NumberField.Group>
+      </NumberField>
+    </div>
   );
 }
 

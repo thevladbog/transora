@@ -53,4 +53,8 @@ transora:
     sync-window-before-min: 30
     ping-interval-ms: 30000
     ping-enabled: true
+  routing:
+    osrm-base-url: ${OSRM_BASE_URL:https://router.project-osrm.org}
+    enabled: ${OSRM_ENABLED:true}
+    cache-ttl-minutes: 1440
 

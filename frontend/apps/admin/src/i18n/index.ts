@@ -16,6 +16,7 @@ import ruTrips from './locales/ru/trips.json';
 import ruAnnouncements from './locales/ru/announcements.json';
 import ruDispatcher from './locales/ru/dispatcher.json';
 import ruSettings from './locales/ru/settings.json';
+import ruRoutes from './locales/ru/routes.json';
 
 import enCommon from './locales/en/common.json';
 import enNav from './locales/en/nav.json';
@@ -32,6 +33,7 @@ import enTrips from './locales/en/trips.json';
 import enAnnouncements from './locales/en/announcements.json';
 import enDispatcher from './locales/en/dispatcher.json';
 import enSettings from './locales/en/settings.json';
+import enRoutes from './locales/en/routes.json';
 
 export const LOCALE_STORAGE_KEY = 'transora.locale';
 export const SUPPORTED_LOCALES = ['ru', 'en'] as const;
@@ -67,6 +69,7 @@ void i18n.use(initReactI18next).init({
       announcements: ruAnnouncements,
       dispatcher: ruDispatcher,
       settings: ruSettings,
+      routes: ruRoutes,
     },
     en: {
       common: enCommon,
@@ -84,6 +87,7 @@ void i18n.use(initReactI18next).init({
       announcements: enAnnouncements,
       dispatcher: enDispatcher,
       settings: enSettings,
+      routes: enRoutes,
     },
   },
   lng: getInitialLocale(),

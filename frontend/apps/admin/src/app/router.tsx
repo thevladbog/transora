@@ -13,8 +13,9 @@ import { PointsListPage } from '@/features/points/PointsListPage';
 import { RefundPoliciesListPage } from '@/features/refund-policies/RefundPoliciesListPage';
 import { StationSettingsPage } from '@/features/settings/StationSettingsPage';
 import { StationsListPage } from '@/features/stations/StationsListPage';
+import { RouteEditorPage } from '@/features/routes/RouteEditorPage';
+import { RoutesListPage } from '@/features/routes/RoutesListPage';
 import { TariffProfileEditorPage } from '@/features/tariff-profiles/TariffProfileEditorPage';
-import { TariffProfilesListPage } from '@/features/tariff-profiles/TariffProfilesListPage';
 import { TripsListPage } from '@/features/trips/TripsListPage';
 import { UserDetailPage } from '@/features/users/UserDetailPage';
 import { UsersListPage } from '@/features/users/UsersListPage';
@@ -43,7 +44,9 @@ export const router = createBrowserRouter([
                     { path: 'points', element: <PointsListPage /> },
                     { path: 'nomenclature', element: <NomenclatureListPage /> },
                     { path: 'policies', element: <RefundPoliciesListPage /> },
-                    { path: 'tariff-profiles', element: <TariffProfilesListPage /> },
+                    { path: 'routes', element: <RoutesListPage /> },
+                    { path: 'routes/:routeId', element: <RouteEditorPage /> },
+                    { path: 'tariff-profiles', element: <Navigate to="/routes" replace /> },
                     { path: 'tariff-profiles/:profileId', element: <TariffProfileEditorPage /> },
                     { path: 'agents', element: <AgentsPage /> },
                     { path: 'users', element: <UsersListPage /> },
@@ -52,7 +55,7 @@ export const router = createBrowserRouter([
                     { path: 'audit', element: <PlaceholderPage /> },
                     { path: 'reports', element: <PlaceholderPage /> },
                     { path: 'refund-policies', element: <Navigate to="/policies" replace /> },
-                    { path: 'tariffs', element: <Navigate to="/tariff-profiles" replace /> },
+                    { path: 'tariffs', element: <Navigate to="/routes" replace /> },
                   ],
                 },
               ]

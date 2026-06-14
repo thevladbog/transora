@@ -48,6 +48,13 @@ class ServiceStationRepository(
             code,
         ).firstOrNull()
 
+    fun findByPointId(pointId: UUID): ServiceStation? =
+        jdbc.query(
+            "SELECT * FROM scheduling.service_stations WHERE point_id = ? LIMIT 1",
+            { rs, _ -> rs.toServiceStation() },
+            pointId,
+        ).firstOrNull()
+
     fun list(): List<ServiceStation> =
         jdbc.query(
             "SELECT * FROM scheduling.service_stations ORDER BY code",

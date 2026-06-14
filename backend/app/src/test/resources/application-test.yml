@@ -22,3 +22,5 @@ transora:
   notifications:
     storage-path: ${java.io.tmpdir}/transora-test-audio
     playback-poll-interval-ms: 60000
+  routing:
+    enabled: false

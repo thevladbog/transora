@@ -12,7 +12,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(dir, 'src'),
       '@transora/api-client': path.resolve(dir, '../../packages/api-client/src/index.ts'),
+      '@internationalized/date': path.resolve(dir, 'node_modules/@internationalized/date/dist/index.mjs'),
     },
+  },
+  optimizeDeps: {
+    include: ['@internationalized/date'],
   },
   server: {
     port: 5173,

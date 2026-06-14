@@ -10,4 +10,3 @@ class JacksonConfig {
     fun objectMapper(): ObjectMapper =
         ObjectMapper().findAndRegisterModules()
 }
-

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import type { TariffProfileResponse } from '@transora/api-client';
 import { FormDrawer } from '@/components/ui/FormDrawer';
+import { FormDateRangePicker } from '@/components/ui/FormDateRangePicker';
 import { FormSelectField, FormTextField } from '@/components/ui/FormFields';
+import { isIsoDateRangeInvalid } from '@/lib/date-values';
 import { useCreateTariffProfile, useUpdateTariffProfile } from './api/hooks';
 import { formatRouteLabel, useRoutesList } from './api/routes-hooks';
 
@@ -66,6 +68,10 @@ export function TariffProfileFormDrawer({
       setError(t('tariffProfiles:nameRequired'));
       return;
     }
+    if (isIsoDateRangeInvalid(validFrom, validTo)) {
+      setError(t('tariffProfiles:invalidDateRange'));
+      return;
+    }
     const payload = {
       name,
       routeId: routeId || undefined,
@@ -109,10 +115,18 @@ export function TariffProfileFormDrawer({
             </ListBox.Item>
           ))}
         </FormSelectField>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <FormTextField label={t('tariffProfiles:validFrom')} name="validFrom" type="date" value={validFrom} onChange={setValidFrom} inputProps={{ type: 'date' }} />
-          <FormTextField label={t('tariffProfiles:validTo')} name="validTo" type="date" value={validTo} onChange={setValidTo} inputProps={{ type: 'date' }} />
-        </div>
+        <FormDateRangePicker
+          label={t('tariffProfiles:validPeriod')}
+          startName="validFrom"
+          endName="validTo"
+          startValue={validFrom}
+          endValue={validTo}
+          errorMessage={t('tariffProfiles:invalidDateRange')}
+          onChange={(start, end) => {
+            setValidFrom(start);
+            setValidTo(end);
+          }}
+        />
         <p className="text-sm text-muted">{t('tariffProfiles:routePoliciesHint')}</p>
         <div className="transora-form-field flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
           <Label>{t('tariffProfiles:isActive')}</Label>

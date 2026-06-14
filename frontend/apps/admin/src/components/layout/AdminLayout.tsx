@@ -23,7 +23,7 @@ const NETWORK_MAIN_NAV: NavItem[] = [
   { to: '/agents', labelKey: 'agents', permission: Permissions.STATIONS_MANAGE, networkOnly: true },
   { to: '/users', labelKey: 'users', permission: Permissions.USERS_VIEW, networkOnly: true },
   { to: '/service-tokens', labelKey: 'serviceTokens', superuser: true, networkOnly: true },
-  { to: '/tariff-profiles', labelKey: 'tariffProfiles', permission: Permissions.SETTINGS_MANAGE_TARIFFS, networkOnly: true },
+  { to: '/routes', labelKey: 'routes', permission: Permissions.SETTINGS_MANAGE_TARIFFS, networkOnly: true },
   { to: '/audit', labelKey: 'audit', permission: Permissions.USERS_VIEW, networkOnly: true },
   { to: '/reports', labelKey: 'reports', permission: Permissions.REPORTS_VIEW_NETWORK, networkOnly: true },
 ];
