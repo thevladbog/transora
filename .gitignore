@@ -31,6 +31,8 @@ station-agent/data/
 .agents/
 skills-lock.json
 
-# Cursor — commit shared MCP config only
+# Cursor — commit shared MCP config and project rules
 .cursor/*
 !.cursor/mcp.json
+!.cursor/rules/
+!.cursor/rules/**

@@ -1,0 +1,31 @@
+---
+description: Frontend monorepo — workspace layout and shared packages
+globs: frontend/**
+alwaysApply: false
+---
+
+# Frontend monorepo (`frontend/`)
+
+pnpm workspace: `apps/*`, `packages/*`. Node **24+** ([`.nvmrc`](frontend/.nvmrc)), registry npmjs.org ([`.npmrc`](frontend/.npmrc)).
+
+## Packages
+
+| Path | Name | Role |
+|------|------|------|
+| `apps/admin/` | `@transora/admin` | HeroUI admin panel (Vite 8, React 19) |
+| `packages/api-client/` | `@transora/api-client` | Orval-generated client + `mutator`, `auth-tokens` |
+
+## Commands (from `frontend/`)
+
+```bash
+pnpm install --ignore-scripts
+pnpm dev              # admin @ :5173
+pnpm api:sync         # fetch OpenAPI + orval (backend must be up)
+```
+
+## Import aliases by package
+
+- **Admin app**: `@/` → `src/` — see [frontend-admin.mdc](frontend-admin.mdc)
+- **API client**: `@/` → `src/` — internal imports only; apps import the package as `@transora/api-client`
+
+When adding a new app under `apps/`, configure `@/` in both `vite.config.ts` (`resolve.alias`) and `tsconfig` (`baseUrl` + `paths`).

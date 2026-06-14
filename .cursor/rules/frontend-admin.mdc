@@ -1,0 +1,42 @@
+---
+description: Admin frontend — imports, structure, UI and i18n conventions
+globs: frontend/apps/admin/**
+alwaysApply: false
+---
+
+# Admin frontend (`frontend/apps/admin`)
+
+## Import aliases
+
+| Alias | Resolves to | Use for |
+|-------|-------------|---------|
+| `@/` | `src/` | App code (components, features, lib, theme, i18n, app) |
+| `@transora/api-client` | workspace package | Generated API client, auth token helpers, `customInstance`, `admin-catalog` |
+
+## Structure
+
+- `src/app/` — router, providers
+- `src/features/<domain>/` — pages, drawers, `api/hooks.ts`
+- `src/components/ui/FormDrawer.tsx` — **side drawer for all create/edit forms**
+- `src/components/map/PointMapPicker.tsx` — Leaflet + OSM geocode
+- `src/i18n/locales/{ru,en}/` — `common`, `nav`, `auth`, `dashboard`, `users`, `points`, `nomenclature`, `tariffProfiles`, `refundPolicies`
+
+## Forms & drawers
+
+- **Create/Edit** → `FormDrawer` (slide-in from right), not `Modal`
+- **Delete confirm** → `ConfirmDialog` (center)
+- **Full editors** (tariff matrix) → dedicated page route
+- Use `FormTextField` / `FormSelectField`; layout: `transora-form-stack`, `transora-form-field`
+- CSS cascade: `@heroui/styles` → `global.css` → `styles/forms.css` in `index.css`
+
+## API hooks
+
+Wrap `@transora/api-client` functions in `features/*/api/hooks.ts` with React Query. Gate with `enabled: isAuthenticated`.
+
+New catalog endpoints live in `packages/api-client/src/admin-catalog.ts` until Orval regen.
+
+## UI & i18n
+
+- HeroUI v3 + Tailwind v4
+- All strings via `useTranslation`
+- Nav: main items + «Справочники» group (points, nomenclature, refund policies)

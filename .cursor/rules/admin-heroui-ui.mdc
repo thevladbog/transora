@@ -1,0 +1,35 @@
+---
+description: Admin UI must use HeroUI components, not native HTML form controls
+globs: frontend/apps/admin/**/*.tsx
+alwaysApply: false
+---
+
+# Admin UI — HeroUI only
+
+The admin app (`frontend/apps/admin`) uses **@heroui/react v3**. All interactive controls must come from HeroUI, not native HTML.
+
+## Form controls
+
+| Need | Use | Never use |
+|------|-----|-----------|
+| Text | `FormTextField` | `<input>`, raw `TextField` without wrapper |
+| Select | `FormSelectField` | `<select>`, native dropdown |
+| Date (single) | `FormDatePicker` | `<input type="date">`, `FormTextField` with `type="date"` |
+| Date range (from/to) | `FormDateRangePicker` | Two separate `FormDatePicker` fields |
+| Number | `FormNumberField` or `NumberField` | `<input type="number">` |
+| Toggle | `Switch` from HeroUI | `<input type="checkbox">` |
+| Buttons | `Button` from HeroUI | `<button>` with custom classes |
+
+## Date picker composition
+
+- Single date: `FormDatePicker` (`@/components/ui/FormDatePicker.tsx`)
+- **From/to pairs**: `FormDateRangePicker` (`@/components/ui/FormDateRangePicker.tsx`) — always use for validity periods; never two separate pickers
+- Both use `DatePicker`/`DateRangePicker` + `DateField` + `Calendar`/`RangeCalendar` from `@heroui/react`
+- Value/onChange: ISO date strings `YYYY-MM-DD` (via `@/lib/date-values`)
+- Range validation: `isIsoDateRangeInvalid`; block save when end < start
+
+## Before adding a new field
+
+1. Check `@/components/ui/FormFields.tsx` and `@/components/ui/FormDatePicker.tsx`
+2. Extend an existing wrapper if the pattern repeats
+3. Match `variant="secondary"` and `fullWidth` like other form fields
