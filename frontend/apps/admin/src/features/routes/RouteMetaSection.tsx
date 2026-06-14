@@ -24,7 +24,6 @@ export function RouteMetaSection({ mode, bundle, onCreated, onUpdated }: RouteMe
 
   const [carrierId, setCarrierId] = useState('');
   const [code, setCode] = useState('');
-  const [routeNumber, setRouteNumber] = useState('');
   const [name, setName] = useState('');
   const [validFrom, setValidFrom] = useState('');
   const [validTo, setValidTo] = useState('');
@@ -37,7 +36,6 @@ export function RouteMetaSection({ mode, bundle, onCreated, onUpdated }: RouteMe
     if (!bundle) return;
     setCarrierId(bundle.carrierId);
     setCode(bundle.code ?? '');
-    setRouteNumber(bundle.routeNumber);
     setName(bundle.name);
     setValidFrom(bundle.validFrom ?? '');
     setValidTo(bundle.validTo ?? '');
@@ -55,10 +53,9 @@ export function RouteMetaSection({ mode, bundle, onCreated, onUpdated }: RouteMe
     const schema = z.object({
       carrierId: z.string().min(1),
       code: z.string().min(1),
-      routeNumber: z.string().min(1),
       name: z.string().min(1),
     });
-    const parsed = schema.safeParse({ carrierId, code, routeNumber, name });
+    const parsed = schema.safeParse({ carrierId, code, name });
     if (!parsed.success) {
       setError(t('routes:requiredFields'));
       return;
@@ -70,7 +67,6 @@ export function RouteMetaSection({ mode, bundle, onCreated, onUpdated }: RouteMe
     const payload = {
       carrierId,
       code: code.trim(),
-      routeNumber: routeNumber.trim(),
       name: name.trim(),
       validFrom: validFrom || undefined,
       validTo: validTo || undefined,
@@ -129,16 +125,6 @@ export function RouteMetaSection({ mode, bundle, onCreated, onUpdated }: RouteMe
           value={code}
           onChange={(value) => {
             setCode(value);
-            markDirty();
-          }}
-        />
-        <FormTextField
-          isRequired
-          label={t('routes:routeNumber')}
-          name="routeNumber"
-          value={routeNumber}
-          onChange={(value) => {
-            setRouteNumber(value);
             markDirty();
           }}
         />

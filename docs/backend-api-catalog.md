@@ -76,7 +76,11 @@ Service token auth: `Authorization: Bearer st_<48 hex chars>` (SHA-256 hash stor
 | PATCH | `/api/trips/{id}/stops/{stopId}` | `schedule:edit` | Update stop times/status |
 | POST | `/api/trips/{id}/stops/{stopId}/arrive` | `schedule:edit` | Record stop arrival |
 | POST | `/api/trips/{id}/stops/{stopId}/depart` | `schedule:edit` | Record stop departure |
-| POST | `/api/schedules/generate` | `schedule:create` | Generate trips for horizon |
+| GET | `/api/schedules` | `schedule:view` | List schedule templates |
+| GET | `/api/schedules/{id}` | `schedule:view` | Schedule detail with entries |
+| POST | `/api/schedules` | `schedule:create` | Create schedule (`PERMANENT` \| `SEASONAL` \| `EXCEPTION` + entries) |
+| PATCH | `/api/schedules/{id}` | `schedule:edit` | Update schedule meta and/or entries |
+| POST | `/api/schedules/generate` | `schedule:create` | Generate trips for horizon (`?fromDate`, `?horizonDays`) |
 | POST | `/api/stations/{code}/schedules/generate` | `schedule:create` | Generate trips for station routes |
 | GET | `/api/board/departures` | Public | Departure board (stop-aware via `trip_stops`; query `stationCode`, optional `windowBeforeMin` / `windowAfterMin`) |
 | GET | `/api/board/arrivals` | Public | Arrival board (stop-aware; includes `IN_TRANSIT` / transit stops) |
@@ -89,6 +93,10 @@ Board row fields (departures/arrivals): `tripId`, `time`, `displayTime`, `route`
 Display time per stop: `actual_*` → `estimated_*` → `scheduled_*` (arrival fields on arrivals board, departure fields on departures).
 
 Outbox events use `scheduling.trip.*` subjects (e.g. `scheduling.trip.created`, `scheduling.trip.status_changed`).
+
+**Schedule types:** `PERMANENT` (no dates), `SEASONAL` (`validFrom` + `validTo`, end > start), `EXCEPTION` (`validFrom === validTo`). Entry: `tripNumber`, `departureTime` (HH:mm), `daysOfWeek` (ISO Mon=1 … Sun=7), optional `defaultVehicleId`.
+
+**Admin UI (network tier):** `/schedules`, `/schedules/new`, `/schedules/:id` — list, editor, generate-trips dialog (`POST /api/schedules/generate`).
 
 ## Station agent (core WebSocket)
 
@@ -220,15 +228,17 @@ Unified route editor: scheduling route + tariff profile stops/matrix + commerce 
 
 | Method | Path | Permission | Description |
 |--------|------|------------|-------------|
-| GET | `/api/admin/route-pricing` | `schedule:view` | List routes: code, routeNumber, name, carrier, stop/matrix counts |
+| GET | `/api/admin/route-pricing` | `schedule:view` | List routes: code, name, carrier, stop/matrix counts (`routeNumber` in response — internal) |
 | GET | `/api/admin/route-pricing/{routeId}` | `schedule:view` | Full bundle: meta, stops, matrix cells, policies context, distanceKm/legs |
-| POST | `/api/admin/route-pricing` | `settings:manage_tariffs` | Create route + auto tariff profile |
-| PUT | `/api/admin/route-pricing/{routeId}` | `settings:manage_tariffs` | Update meta (code, routeNumber, name, validFrom/To, isActive) |
+| POST | `/api/admin/route-pricing` | `settings:manage_tariffs` | Create route + auto tariff profile (`routeNumber` optional → defaults to `code` or `name`) |
+| PUT | `/api/admin/route-pricing/{routeId}` | `settings:manage_tariffs` | Update meta (code, name, validFrom/To, isActive; optional `routeNumber`) |
 | PUT | `/api/admin/route-pricing/{routeId}/stops` | `settings:manage_tariffs` | Sync `route_stops` + `tariff_profile_stops` from point IDs |
 | PUT | `/api/admin/route-pricing/{routeId}/matrix` | `settings:manage_tariffs` | Upsert tariff matrix cells |
 | DELETE | `/api/admin/route-pricing/{routeId}` | `settings:manage_tariffs` | Deactivate route |
 
-`POST /api/trips/from-route`: `tripNumber` optional — defaults to `route.routeNumber` when omitted.
+`POST /api/trips/from-route`: `tripNumber` optional on API — defaults to `route.routeNumber` when omitted. Admin UI requires explicit `tripNumber` (trip numbers are defined in schedule templates).
+
+**Admin UI `/routes`:** code + name (no route-number field); labels use `code — name`.
 
 ## System
 

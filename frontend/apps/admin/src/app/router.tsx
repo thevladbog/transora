@@ -15,6 +15,8 @@ import { StationSettingsPage } from '@/features/settings/StationSettingsPage';
 import { StationsListPage } from '@/features/stations/StationsListPage';
 import { RouteEditorPage } from '@/features/routes/RouteEditorPage';
 import { RoutesListPage } from '@/features/routes/RoutesListPage';
+import { ScheduleEditorPage } from '@/features/schedules/ScheduleEditorPage';
+import { SchedulesListPage } from '@/features/schedules/SchedulesListPage';
 import { TariffProfileEditorPage } from '@/features/tariff-profiles/TariffProfileEditorPage';
 import { TripsListPage } from '@/features/trips/TripsListPage';
 import { UserDetailPage } from '@/features/users/UserDetailPage';
@@ -46,6 +48,8 @@ export const router = createBrowserRouter([
                     { path: 'policies', element: <RefundPoliciesListPage /> },
                     { path: 'routes', element: <RoutesListPage /> },
                     { path: 'routes/:routeId', element: <RouteEditorPage /> },
+                    { path: 'schedules', element: <SchedulesListPage /> },
+                    { path: 'schedules/:scheduleId', element: <ScheduleEditorPage /> },
                     { path: 'tariff-profiles', element: <Navigate to="/routes" replace /> },
                     { path: 'tariff-profiles/:profileId', element: <TariffProfileEditorPage /> },
                     { path: 'agents', element: <AgentsPage /> },

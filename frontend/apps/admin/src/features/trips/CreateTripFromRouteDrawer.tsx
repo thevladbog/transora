@@ -8,13 +8,13 @@ import { FormSelectField, FormTextField } from '@/components/ui/FormFields';
 import { FormTimeField } from '@/components/ui/FormTimeField';
 import { isIsoDateBeforeToday, todayIsoDate } from '@/lib/date-values';
 import { useRoutesPricingList } from '@/features/routes/api/hooks';
+import { formatRouteLabel } from '@/features/routes/route-label';
 import { useCreateTripFromRoute, useVehiclesList } from './api/hooks';
 
 type CreateTripFromRouteDrawerProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   routeId?: string;
-  defaultTripNumber?: string;
   stationCode?: string;
   onSuccess?: () => void;
 };
@@ -23,7 +23,6 @@ export function CreateTripFromRouteDrawer({
   isOpen,
   onOpenChange,
   routeId: presetRouteId,
-  defaultTripNumber,
   stationCode,
   onSuccess,
 }: CreateTripFromRouteDrawerProps) {
@@ -48,8 +47,6 @@ export function CreateTripFromRouteDrawer({
   );
 
   const effectiveRouteId = presetRouteId ?? selectedRouteId;
-  const selectedRoute = routeOptions.find((route) => route.routeId === effectiveRouteId);
-  const tripNumberPlaceholder = defaultTripNumber ?? selectedRoute?.routeNumber ?? '';
 
   useEffect(() => {
     if (!isOpen) return;
@@ -65,6 +62,7 @@ export function CreateTripFromRouteDrawer({
 
   const needsVehicle = openSales && !vehicleId;
   const needsRoute = !effectiveRouteId;
+  const needsTripNumber = !tripNumber.trim();
   const pastDate = isIsoDateBeforeToday(tripDate);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -79,6 +77,10 @@ export function CreateTripFromRouteDrawer({
       setErrorMessage(t('pastDate'));
       return;
     }
+    if (needsTripNumber) {
+      setErrorMessage(t('tripNumberRequired'));
+      return;
+    }
     if (needsVehicle) {
       setErrorMessage(t('needsVehicle'));
       return;
@@ -88,7 +90,7 @@ export function CreateTripFromRouteDrawer({
       routeId: effectiveRouteId,
       tripDate,
       departureTime,
-      ...(tripNumber.trim() ? { tripNumber: tripNumber.trim() } : {}),
+      tripNumber: tripNumber.trim(),
       ...(platform.trim() ? { platform: platform.trim() } : {}),
       ...(openSales ? { openSales: true, vehicleId } : {}),
     };
@@ -134,9 +136,9 @@ export function CreateTripFromRouteDrawer({
               <ListBox.Item
                 key={route.routeId}
                 id={route.routeId}
-                textValue={`${route.routeNumber} ${route.name}`}
+                textValue={formatRouteLabel(route)}
               >
-                {route.routeNumber} — {route.name}
+                {formatRouteLabel(route)}
               </ListBox.Item>
             ))}
           </FormSelectField>
@@ -146,12 +148,12 @@ export function CreateTripFromRouteDrawer({
         <FormTimeField label={t('departureTime')} value={departureTime} onChange={setDepartureTime} isRequired />
 
         <FormTextField
+          isRequired
           label={t('tripNumber')}
           value={tripNumber}
           onChange={setTripNumber}
-          inputProps={{ placeholder: tripNumberPlaceholder }}
         />
-        <p className="text-sm text-muted">{t('tripNumberHint', { routeNumber: tripNumberPlaceholder || '—' })}</p>
+        <p className="text-sm text-muted">{t('tripNumberHint')}</p>
 
         <FormTextField label={t('platform')} value={platform} onChange={setPlatform} />
 

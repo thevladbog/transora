@@ -1,4 +1,4 @@
-import { CalendarDate } from '@internationalized/date';
+import { CalendarDate, parseTime, type Time } from '@internationalized/date';
 import type { DateValue } from '@internationalized/date';
 
 export function isoDateToValue(iso: string): DateValue | null {
@@ -54,6 +54,23 @@ export function isValidTimeString(value: string): boolean {
   const hour = Number(match[1]);
   const minute = Number(match[2]);
   return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
+/** Parse HH:mm to HeroUI Time; returns null when empty or invalid. */
+export function timeStringToValue(value: string): Time | null {
+  if (!value) return null;
+  if (!isValidTimeString(value)) return null;
+  try {
+    return parseTime(value);
+  } catch {
+    return null;
+  }
+}
+
+/** Format HeroUI Time as HH:mm (LocalTime-compatible). */
+export function timeValueToString(value: Time | null | undefined): string {
+  if (!value) return '';
+  return formatTimeString(String(value.hour), String(value.minute));
 }
 
 export function todayIsoDate(): string {

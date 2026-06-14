@@ -34,7 +34,6 @@ export function RoutesListPage() {
             <Table.Content>
               <Table.Header>
                 <Table.Column isRowHeader>{t('routes:internalCode')}</Table.Column>
-                <Table.Column>{t('routes:routeNumber')}</Table.Column>
                 <Table.Column>{t('routes:routeName')}</Table.Column>
                 <Table.Column>{t('routes:carrier')}</Table.Column>
                 <Table.Column>{t('routes:stopsCount')}</Table.Column>
@@ -46,7 +45,6 @@ export function RoutesListPage() {
                 {(item) => (
                   <Table.Row id={item.routeId}>
                     <Table.Cell className="font-mono">{item.code ?? '—'}</Table.Cell>
-                    <Table.Cell className="font-mono">{item.routeNumber}</Table.Cell>
                     <Table.Cell>{item.name}</Table.Cell>
                     <Table.Cell>{item.carrierName ?? '—'}</Table.Cell>
                     <Table.Cell className="font-mono">{item.stopCount}</Table.Cell>

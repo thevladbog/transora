@@ -56,7 +56,7 @@ class RoutePricingAdminService(
                 carrierId = request.carrierId,
                 name = request.name,
                 code = request.code,
-                routeNumber = request.routeNumber,
+                routeNumber = request.routeNumber.orEmpty(),
                 description = request.description,
                 stops = emptyList(),
             ),

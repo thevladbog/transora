@@ -72,8 +72,8 @@ class RoutePricingAdminController(
 
 data class CreateRoutePricingRequest(
     val carrierId: UUID,
-    @field:NotBlank val code: String,
-    @field:NotBlank val routeNumber: String,
+    val code: String,
+    val routeNumber: String? = null,
     @field:NotBlank val name: String,
     val description: String? = null,
 )

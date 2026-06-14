@@ -57,7 +57,7 @@ export interface RoutePricingBundleResponse {
 export interface CreateRoutePricingRequest {
   carrierId: string;
   code: string;
-  routeNumber: string;
+  routeNumber?: string;
   name: string;
   description?: string;
 }

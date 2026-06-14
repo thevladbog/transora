@@ -13,6 +13,7 @@ import { Permissions } from '@/lib/permissions';
 import { useRoutePricing, useUpsertRouteMatrix } from './api/hooks';
 import { RouteMetaSection } from './RouteMetaSection';
 import { RouteStopsEditor } from './RouteStopsEditor';
+import { formatRouteLabel } from './route-label';
 
 function formatDistance(km: number | undefined, source: string | undefined, t: TFunction<'routes'>): string {
   if (km == null) return t('routes:distanceUnavailable');
@@ -49,7 +50,7 @@ export function RouteEditorPage() {
   const title = isNew
     ? t('routes:createTitle')
     : bundle
-      ? `${bundle.routeNumber} — ${bundle.name}`
+      ? formatRouteLabel(bundle)
       : t('routes:editorTitle');
 
   return (
@@ -80,7 +81,6 @@ export function RouteEditorPage() {
         isOpen={createTripOpen}
         onOpenChange={setCreateTripOpen}
         routeId={canCreateTrip ? routeId : undefined}
-        defaultTripNumber={bundle?.routeNumber}
       />
 
       <RouteMetaSection

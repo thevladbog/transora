@@ -125,7 +125,7 @@ class RoutePricingIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `from-route defaults tripNumber to route routeNumber`() {
+    fun `from-route defaults tripNumber to route code when routeNumber omitted`() {
         val carrierId = createCarrier()
         val point1 = createPoint("RP-T1", "Trip Stop A")
         val point2 = createPoint("RP-T2", "Trip Stop B")
@@ -137,11 +137,13 @@ class RoutePricingIntegrationTest : IntegrationTestBase() {
                 {
                   "carrierId": "$carrierId",
                   "code": "RP-TRIP",
-                  "routeNumber": "777",
                   "name": "Trip default test"
                 }
             """.trimIndent()
-        }.andExpect { status { isOk() } }.andReturn().response.contentAsString
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.routeNumber").value("RP-TRIP")
+        }.andReturn().response.contentAsString
 
         val routeId = extractJsonField(createBody, "routeId")
 
@@ -166,8 +168,8 @@ class RoutePricingIntegrationTest : IntegrationTestBase() {
             """.trimIndent()
         }.andExpect {
             status { isOk() }
-            jsonPath("$.tripNumber").value("777")
-            jsonPath("$.routeNumber").value("777")
+            jsonPath("$.tripNumber").value("RP-TRIP")
+            jsonPath("$.routeNumber").value("RP-TRIP")
         }
     }
 
