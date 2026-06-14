@@ -12,13 +12,44 @@ Modular monolith base path: `/api` (auth under `/auth`).
 | POST | `/auth/refresh` | Public | Refresh access token |
 | POST | `/auth/logout` | Bearer | Revoke session |
 | GET | `/auth/me` | Bearer | Current user profile and permissions |
+| GET | `/auth/me/stations` | Bearer | Branches assigned to the current user (station admin switcher) |
+| POST | `/auth/switch-station` | Bearer | Switch branch context; returns new token pair (`stationId`, optional `refreshToken`) |
 | GET | `/auth/jwks.json` | Public | JWT public keys |
+
+## Admin Stations (`/api/admin/stations`)
+
+| Method | Path | Permission | Description |
+|--------|------|------------|-------------|
+| GET | `/api/admin/stations` | `stations:manage` | List branches with agent status |
+| GET | `/api/admin/stations/{id}` | `stations:manage` | Branch detail |
+| POST | `/api/admin/stations` | `stations:manage` | Create branch (optional map `point`) |
+| PATCH | `/api/admin/stations/{id}` | `stations:manage` | Update branch |
+| POST | `/api/admin/stations/{id}/provisioning-token` | `stations:manage` | One-time code for station-agent |
+| GET | `/api/admin/stations/{id}/status` | `stations:manage` | Agent online/offline |
+
+## Station provisioning (`/api/stations`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/stations/provision` | Public | Bind station-agent using provisioning code; returns `serviceToken` + `stationId` |
+
+## Station agent ops (`/api/stations/{stationId}/agent`)
+
+| Method | Path | Permission | Description |
+|--------|------|------------|-------------|
+| POST | `/api/stations/{stationId}/agent/sync-force` | `announcements:manage_queue` | Force connected agent to resync schedule cache |
+
+## Admin display boards (`/api/admin/stations/{stationId}/display-boards`)
+
+| Method | Path | Permission | Description |
+|--------|------|------------|-------------|
+| GET | `/api/admin/stations/{stationId}/display-boards` | `schedule:view` | List active display boards for a branch |
 
 ## IAM Admin (`/api/admin/users`, `/api/admin/service-tokens`)
 
 | Method | Path | Permission / Auth | Description |
 |--------|------|-------------------|-------------|
-| GET | `/api/admin/users` | `users:view` | List users |
+| GET | `/api/admin/users` | `users:view` | List users (optional `?stationId=`; defaults to `X-Station-ID` when set) |
 | GET | `/api/admin/users/{id}` | `users:view` | User detail with assignments (`assignmentId`) |
 | POST | `/api/admin/users` | `users:create` | Create user (`userType`: `USER` \| `SERVICE`; password optional for SERVICE) |
 | POST | `/api/admin/users/{id}/assignments` | `users:create` | Assign station role |

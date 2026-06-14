@@ -27,6 +27,7 @@ object Permissions {
     const val REPORTS_VIEW_STATION = "reports:view_station"
     const val REPORTS_VIEW_NETWORK = "reports:view_network"
     const val SETTINGS_MANAGE_TARIFFS = "settings:manage_tariffs"
+    const val STATIONS_MANAGE = "stations:manage"
 }
 
 object RoleCodes {
@@ -50,6 +51,7 @@ object RolePermissionMatrix {
         Permissions.USERS_VIEW, Permissions.USERS_CREATE, Permissions.USERS_EDIT,
         Permissions.USERS_DEACTIVATE, Permissions.REPORTS_VIEW_STATION,
         Permissions.REPORTS_VIEW_NETWORK, Permissions.SETTINGS_MANAGE_TARIFFS,
+        Permissions.STATIONS_MANAGE,
     )
 
     fun permissionsFor(roleCode: String): Set<String> = when (roleCode) {
@@ -59,7 +61,7 @@ object RolePermissionMatrix {
             Permissions.USERS_DEACTIVATE, Permissions.SCHEDULE_VIEW,
             Permissions.TICKETS_VIEW, Permissions.SHIFTS_MANAGE, Permissions.INVENTORY_VIEW,
             Permissions.DOCUMENTS_VIEW_MANIFEST, Permissions.BOARDING_VIEW_STATS,
-            Permissions.REPORTS_VIEW_STATION,
+            Permissions.REPORTS_VIEW_STATION, Permissions.STATIONS_MANAGE,
         )
         RoleCodes.DISPATCHER -> setOf(
             Permissions.SCHEDULE_VIEW, Permissions.SCHEDULE_CREATE, Permissions.SCHEDULE_EDIT,

@@ -1,0 +1,23 @@
+{
+  "dashboard": "Dashboard",
+  "users": "Пользователи",
+  "stations": "Филиалы",
+  "agents": "Агенты",
+  "trips": "Рейсы / табло",
+  "dispatcher": "Диспетчер",
+  "announcements": "Объявления",
+  "settings": "Настройки",
+  "switchStation": "Филиал",
+  "serviceTokens": "Service tokens",
+  "reference": "Справочники",
+  "points": "Точки",
+  "nomenclature": "Номенклатура",
+  "refundPolicies": "Политики",
+  "tariffProfiles": "Тарифы",
+  "audit": "Audit log",
+  "reports": "Отчёты",
+  "logout": "Выйти",
+  "superuser": "Superuser",
+  "placeholderTitle": "Раздел в разработке",
+  "placeholderDescription": "Раздел в разработке. API client уже сгенерирован через orval."
+}

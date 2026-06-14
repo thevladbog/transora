@@ -1,0 +1,20 @@
+{
+  "title": "Dashboard",
+  "welcome": "Добро пожаловать в панель управления Transora.",
+  "profile": "Профиль",
+  "fullName": "Имя",
+  "login": "Логин",
+  "role": "Роль",
+  "roleSuperuser": "System admin",
+  "roleStationScoped": "Station scoped",
+  "stationId": "Station ID",
+  "permissions": "Permissions ({{count}})",
+  "currentStation": "Текущий филиал",
+  "agentOnline": "Station-agent online",
+  "agentOffline": "Station-agent offline",
+  "networkSummary": "Сводка по сети",
+  "stationsTotal": "Филиалов",
+  "agentsOnline": "Agents online",
+  "agentsOffline": "Agents offline",
+  "tripsCount": "Рейсов (24ч): {{count}}"
+}

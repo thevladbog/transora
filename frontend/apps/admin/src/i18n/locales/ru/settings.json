@@ -1,0 +1,15 @@
+{
+  "title": "Настройки филиала",
+  "description": "Справочная информация о текущем филиале (только чтение)",
+  "code": "Код",
+  "name": "Название",
+  "city": "Город",
+  "timezone": "Часовой пояс",
+  "address": "Адрес",
+  "status": "Статус",
+  "agentStatus": "Station-agent",
+  "agentOnline": "Online",
+  "agentOffline": "Offline",
+  "loadError": "Не удалось загрузить филиал",
+  "readOnlyHint": "Редактирование филиала доступно в суперадминке."
+}

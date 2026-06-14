@@ -63,6 +63,7 @@ services:
       - "9090:9090"
 
   station-agent:
+    profiles: ["default", "station-site"]
     build:
       context: .
       dockerfile: station-agent/Dockerfile
@@ -73,9 +74,10 @@ services:
     environment:
       CORE_HTTP_URL: http://backend:8080
       CORE_WS_URL: ws://backend:8080/ws/stations
-      STATION_ID: "00000000-0000-0000-0000-000000000001"
-      CORE_LOGIN: station_agent
-      CORE_PASSWORD: station_agent
+      STATION_ID: ${STATION_ID:-00000000-0000-0000-0000-000000000001}
+      CORE_LOGIN: ${CORE_LOGIN:-station_agent}
+      CORE_PASSWORD: ${CORE_PASSWORD:-station_agent}
+      REGISTRATION_CODE: ${REGISTRATION_CODE:-}
       STATION_AGENT_TOKEN: ${STATION_AGENT_TOKEN:-}
       AGENT_LISTEN: ":8081"
       SCHEDULE_CACHE_DB: /app/data/schedule_cache.db

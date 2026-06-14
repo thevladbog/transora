@@ -12,7 +12,7 @@ import ru.transora.app.iam.ServiceTokenRepository
 import ru.transora.app.iam.StationAssignmentRepository
 import ru.transora.app.iam.TokenHashing
 import ru.transora.app.iam.UserRepository
-import ru.transora.iam.permissions.RolePermissionMatrix
+import ru.transora.app.iam.security.effectivePermissions
 import java.time.Instant
 import java.util.UUID
 
@@ -46,12 +46,9 @@ class ServiceTokenAuthenticationFilter(
         }
 
         val assignments = stationAssignmentRepository.activeAssignmentsForUser(user.id)
-        val permissions = if (user.isSuperuser) {
-            RolePermissionMatrix.allPermissions
-        } else {
-            assignments.flattenPermissions()
-        }
         val stationHeader = request.getHeader("X-Station-ID")?.let(UUID::fromString)
+        val stationId = stationHeader ?: assignments.firstOrNull()?.stationId
+        val permissions = effectivePermissions(user.isSuperuser, assignments, stationId)
         val principal = JwtPrincipal(
             userId = user.id,
             login = user.login,

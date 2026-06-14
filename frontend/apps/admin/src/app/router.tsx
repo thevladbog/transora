@@ -1,9 +1,26 @@
 import { createBrowserRouter, Navigate } from 'react-router';
-import { AdminLayout } from '../components/layout/AdminLayout';
-import { LoginPage } from '../features/auth/LoginPage';
-import { ProtectedRoute } from '../features/auth/ProtectedRoute';
-import { DashboardPage } from '../features/dashboard/DashboardPage';
-import { PlaceholderPage } from '../features/placeholder/PlaceholderPage';
+import { AdminLayout } from '@/components/layout/AdminLayout';
+import { LoginPage } from '@/features/auth/LoginPage';
+import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
+import { NetworkTierGuard, StationTierGuard } from '@/features/auth/TierGuard';
+import { AgentsPage } from '@/features/agents/AgentsPage';
+import { AnnouncementsPage } from '@/features/announcements/AnnouncementsPage';
+import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { DispatcherPage } from '@/features/dispatcher/DispatcherPage';
+import { NomenclatureListPage } from '@/features/nomenclature/NomenclatureListPage';
+import { PlaceholderPage } from '@/features/placeholder/PlaceholderPage';
+import { PointsListPage } from '@/features/points/PointsListPage';
+import { RefundPoliciesListPage } from '@/features/refund-policies/RefundPoliciesListPage';
+import { StationSettingsPage } from '@/features/settings/StationSettingsPage';
+import { StationsListPage } from '@/features/stations/StationsListPage';
+import { TariffProfileEditorPage } from '@/features/tariff-profiles/TariffProfileEditorPage';
+import { TariffProfilesListPage } from '@/features/tariff-profiles/TariffProfilesListPage';
+import { TripsListPage } from '@/features/trips/TripsListPage';
+import { UserDetailPage } from '@/features/users/UserDetailPage';
+import { UsersListPage } from '@/features/users/UsersListPage';
+import { isNetworkTier } from '@/lib/app-tier';
+
+const networkOnly = isNetworkTier();
 
 export const router = createBrowserRouter([
   {
@@ -17,12 +34,42 @@ export const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { index: true, element: <DashboardPage /> },
-          { path: 'users', element: <PlaceholderPage /> },
-          { path: 'service-tokens', element: <PlaceholderPage /> },
-          { path: 'tariffs', element: <PlaceholderPage /> },
-          { path: 'refund-policies', element: <PlaceholderPage /> },
-          { path: 'audit', element: <PlaceholderPage /> },
-          { path: 'reports', element: <PlaceholderPage /> },
+          ...(networkOnly
+            ? [
+                {
+                  element: <NetworkTierGuard />,
+                  children: [
+                    { path: 'stations', element: <StationsListPage /> },
+                    { path: 'points', element: <PointsListPage /> },
+                    { path: 'nomenclature', element: <NomenclatureListPage /> },
+                    { path: 'policies', element: <RefundPoliciesListPage /> },
+                    { path: 'tariff-profiles', element: <TariffProfilesListPage /> },
+                    { path: 'tariff-profiles/:profileId', element: <TariffProfileEditorPage /> },
+                    { path: 'agents', element: <AgentsPage /> },
+                    { path: 'users', element: <UsersListPage /> },
+                    { path: 'users/:userId', element: <UserDetailPage /> },
+                    { path: 'service-tokens', element: <PlaceholderPage /> },
+                    { path: 'audit', element: <PlaceholderPage /> },
+                    { path: 'reports', element: <PlaceholderPage /> },
+                    { path: 'refund-policies', element: <Navigate to="/policies" replace /> },
+                    { path: 'tariffs', element: <Navigate to="/tariff-profiles" replace /> },
+                  ],
+                },
+              ]
+            : [
+                {
+                  element: <StationTierGuard />,
+                  children: [
+                    { path: 'agents', element: <AgentsPage /> },
+                    { path: 'trips', element: <TripsListPage /> },
+                    { path: 'dispatcher', element: <DispatcherPage /> },
+                    { path: 'announcements', element: <AnnouncementsPage /> },
+                    { path: 'users', element: <UsersListPage /> },
+                    { path: 'users/:userId', element: <UserDetailPage /> },
+                    { path: 'settings', element: <StationSettingsPage /> },
+                  ],
+                },
+              ]),
         ],
       },
     ],

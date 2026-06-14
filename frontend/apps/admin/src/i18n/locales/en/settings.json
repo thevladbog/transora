@@ -1,0 +1,15 @@
+{
+  "title": "Branch settings",
+  "description": "Read-only information about the current branch",
+  "code": "Code",
+  "name": "Name",
+  "city": "City",
+  "timezone": "Timezone",
+  "address": "Address",
+  "status": "Status",
+  "agentStatus": "Station-agent",
+  "agentOnline": "Online",
+  "agentOffline": "Offline",
+  "loadError": "Failed to load branch",
+  "readOnlyHint": "Branch editing is available in super-admin."
+}

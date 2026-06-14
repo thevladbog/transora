@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException
 import ru.transora.app.iam.security.JwtService
 import ru.transora.app.iam.TokenBlacklistService
 import ru.transora.app.iam.security.currentPrincipal
+import ru.transora.app.iam.UserStationResponse
 import ru.transora.iam.domain.AuthenticatedUser
 import ru.transora.iam.domain.TokenPair
 import java.time.Duration
@@ -64,6 +65,21 @@ class AuthController(
         return user.toResponse()
     }
 
+    @GetMapping("/me/stations")
+    fun meStations(): List<UserStationResponse> {
+        val principal = currentPrincipal()
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+        return authService.stationsForUser(principal.userId)
+    }
+
+    @PostMapping("/switch-station")
+    fun switchStation(@Valid @RequestBody request: SwitchStationBody): TokenResponse {
+        val principal = currentPrincipal()
+            ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+        val pair = authService.switchStation(principal.userId, request.stationId, request.refreshToken)
+        return pair.toResponse()
+    }
+
     @GetMapping("/jwks.json")
     fun jwks(): Map<String, Any> = jwtService.publicJwk()
 }
@@ -80,6 +96,11 @@ data class RefreshBody(
 )
 
 data class LogoutBody(val refreshToken: String?)
+
+data class SwitchStationBody(
+    val stationId: UUID? = null,
+    val refreshToken: String? = null,
+)
 
 data class TokenResponse(
     val accessToken: String,

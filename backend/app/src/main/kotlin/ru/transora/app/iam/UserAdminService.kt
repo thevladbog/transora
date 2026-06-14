@@ -51,6 +51,7 @@ class UserAdminService(
         )
         userRepository.insert(user)
         request.assignments.orEmpty().forEach { assignment ->
+            StationScope.assertSameStationOrSuperuser(assignment.stationId)
             val role = roleRepository.findByCode(assignment.roleCode)
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown role ${assignment.roleCode}")
             stationAssignmentRepository.assign(userId, assignment.stationId, role.id, createdBy)

@@ -1,22 +1,24 @@
 import { useLocation } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
-const TITLES: Record<string, string> = {
-  '/users': 'Пользователи',
-  '/service-tokens': 'Service tokens',
-  '/tariffs': 'Тарифы',
-  '/refund-policies': 'Политики возвратов',
-  '/audit': 'Audit log',
-  '/reports': 'Отчёты',
+const TITLE_KEYS: Record<string, string> = {
+  '/users': 'users',
+  '/service-tokens': 'serviceTokens',
+  '/tariffs': 'tariffs',
+  '/policies': 'refundPolicies',
+  '/audit': 'audit',
+  '/reports': 'reports',
 };
 
 export function PlaceholderPage() {
   const { pathname } = useLocation();
-  const title = TITLES[pathname] ?? 'Раздел';
+  const { t } = useTranslation('nav');
+  const titleKey = TITLE_KEYS[pathname] ?? 'dashboard';
 
   return (
     <div className="space-y-2">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <p className="text-muted">Раздел в разработке. API client уже сгенерирован через orval.</p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t(titleKey)}</h1>
+      <p className="text-muted">{t('placeholderDescription')}</p>
     </div>
   );
 }

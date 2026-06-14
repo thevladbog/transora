@@ -57,6 +57,7 @@ class AdminReportController(
 @RestController
 @RequestMapping("/api/admin/tariffs")
 @Tag(name = "Admin Tariffs")
+@Deprecated("Use /api/admin/tariff-profiles instead")
 class TariffAdminController(
     private val tariffAdminService: TariffAdminService,
 ) {
@@ -84,32 +85,82 @@ class TariffAdminController(
 }
 
 @RestController
-@RequestMapping("/api/admin/refund-policies")
-@Tag(name = "Admin Refund Policies")
-class RefundPolicyAdminController(
-    private val refundPolicyAdminService: RefundPolicyAdminService,
+@RequestMapping("/api/admin/policies")
+@Tag(name = "Admin Commerce Policies")
+class CommercePolicyAdminController(
+    private val commercePolicyAdminService: CommercePolicyAdminService,
 ) {
     @GetMapping
     @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
-    fun list(): List<RefundPolicyResponse> = refundPolicyAdminService.list()
+    fun list(@RequestParam(required = false) policyType: String?): List<CommercePolicyResponse> =
+        commercePolicyAdminService.list(policyType)
 
     @GetMapping("/{id}")
     @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
-    fun get(@PathVariable id: UUID): RefundPolicyResponse = refundPolicyAdminService.get(id)
+    fun get(@PathVariable id: UUID): CommercePolicyResponse = commercePolicyAdminService.get(id)
 
     @PostMapping
     @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
-    fun create(@Valid @RequestBody request: UpsertRefundPolicyRequest): RefundPolicyResponse =
-        refundPolicyAdminService.create(request)
+    fun create(@Valid @RequestBody request: UpsertCommercePolicyRequest): CommercePolicyResponse =
+        commercePolicyAdminService.create(request)
 
     @PutMapping("/{id}")
     @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
-    fun update(@PathVariable id: UUID, @Valid @RequestBody request: UpsertRefundPolicyRequest): RefundPolicyResponse =
-        refundPolicyAdminService.update(id, request)
+    fun update(@PathVariable id: UUID, @Valid @RequestBody request: UpsertCommercePolicyRequest): CommercePolicyResponse =
+        commercePolicyAdminService.update(id, request)
 
     @DeleteMapping("/{id}")
     @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
-    fun delete(@PathVariable id: UUID) = refundPolicyAdminService.delete(id)
+    fun delete(@PathVariable id: UUID) = commercePolicyAdminService.delete(id)
+}
+
+@RestController
+@RequestMapping("/api/admin/refund-policies")
+@Tag(name = "Admin Refund Policies (deprecated)")
+@Deprecated("Use /api/admin/policies")
+class RefundPolicyAdminController(
+    private val commercePolicyAdminService: CommercePolicyAdminService,
+) {
+    @GetMapping
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun list(): List<CommercePolicyResponse> = commercePolicyAdminService.list("REFUND")
+
+    @GetMapping("/{id}")
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun get(@PathVariable id: UUID): CommercePolicyResponse = commercePolicyAdminService.get(id)
+
+    @PostMapping
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun create(@Valid @RequestBody request: UpsertCommercePolicyRequest): CommercePolicyResponse =
+        commercePolicyAdminService.create(request.copy(policyType = request.policyType ?: "REFUND"))
+
+    @PutMapping("/{id}")
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun update(@PathVariable id: UUID, @Valid @RequestBody request: UpsertCommercePolicyRequest): CommercePolicyResponse =
+        commercePolicyAdminService.update(id, request)
+
+    @DeleteMapping("/{id}")
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun delete(@PathVariable id: UUID) = commercePolicyAdminService.delete(id)
+}
+
+@RestController
+@RequestMapping("/api/admin/routes/{routeId}/policies")
+@Tag(name = "Admin Route Commerce Policies")
+class RouteCommercePolicyAdminController(
+    private val commercePolicyAdminService: CommercePolicyAdminService,
+) {
+    @GetMapping
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun list(@PathVariable routeId: UUID): RoutePoliciesResponse =
+        commercePolicyAdminService.listRoutePolicies(routeId)
+
+    @PutMapping
+    @RequirePermission(Permissions.SETTINGS_MANAGE_TARIFFS)
+    fun replace(
+        @PathVariable routeId: UUID,
+        @Valid @RequestBody request: ReplaceRoutePoliciesRequest,
+    ): RoutePoliciesResponse = commercePolicyAdminService.replaceRoutePolicies(routeId, request)
 }
 
 data class StationRevenueResponse(
@@ -151,12 +202,24 @@ data class TariffResponse(
     val createdAt: Instant,
 )
 
-data class UpsertRefundPolicyRequest(
+data class UpsertCommercePolicyRequest(
     @field:NotBlank val name: String,
     val isActive: Boolean? = null,
     val serviceFeeCents: Long? = null,
+    val policyType: String? = "REFUND",
+    val nomenclatureItemId: UUID? = null,
+    val isMandatory: Boolean? = null,
+    val pricingMode: String? = "FROM_NOMENCLATURE",
+    val fixedPriceCents: Long? = null,
+    val percentValue: BigDecimal? = null,
+    val percentBasis: String? = null,
+    val minPriceCents: Long? = null,
+    val maxPriceCents: Long? = null,
     val tiers: List<RefundPolicyTierRequest> = emptyList(),
 )
+
+/** @deprecated Use UpsertCommercePolicyRequest */
+typealias UpsertRefundPolicyRequest = UpsertCommercePolicyRequest
 
 data class RefundPolicyTierRequest(
     val hoursBeforeMin: Int? = null,
@@ -164,24 +227,66 @@ data class RefundPolicyTierRequest(
     val penaltyPercent: BigDecimal,
     val refundAllowed: Boolean? = null,
     val sortOrder: Int? = null,
+    val fixedPriceCents: Long? = null,
+    val percentValue: BigDecimal? = null,
 )
 
-data class RefundPolicyResponse(
+data class CommercePolicyResponse(
     val id: String,
     val name: String,
     val isActive: Boolean,
     val serviceFeeCents: Long,
     val createdAt: Instant,
-    val tiers: List<RefundPolicyTierResponse>,
+    val policyType: String,
+    val nomenclatureItemId: String?,
+    val nomenclatureCode: String?,
+    val nomenclatureName: String?,
+    val isMandatory: Boolean,
+    val pricingMode: String,
+    val fixedPriceCents: Long?,
+    val percentValue: BigDecimal?,
+    val percentBasis: String?,
+    val minPriceCents: Long?,
+    val maxPriceCents: Long?,
+    val tiers: List<CommercePolicyTierResponse>,
 )
 
-data class RefundPolicyTierResponse(
+/** @deprecated Use CommercePolicyResponse */
+typealias RefundPolicyResponse = CommercePolicyResponse
+
+data class CommercePolicyTierResponse(
     val id: String,
     val hoursBeforeMin: Int?,
     val hoursBeforeMax: Int?,
     val penaltyPercent: BigDecimal,
     val refundAllowed: Boolean,
     val sortOrder: Int,
+    val fixedPriceCents: Long?,
+    val percentValue: BigDecimal?,
+)
+
+/** @deprecated Use CommercePolicyTierResponse */
+typealias RefundPolicyTierResponse = CommercePolicyTierResponse
+
+data class ReplaceRoutePoliciesRequest(
+    val policies: List<RoutePolicyBindingRequest> = emptyList(),
+)
+
+data class RoutePolicyBindingRequest(
+    val policyId: UUID,
+    val priority: Int,
+)
+
+data class RoutePoliciesResponse(
+    val policies: List<RoutePolicyEntry>,
+)
+
+data class RoutePolicyEntry(
+    val policyId: String,
+    val priority: Int,
+    val policyName: String,
+    val policyType: String,
+    val policyActive: Boolean,
 )
 
 data class AdminAuditResponse(

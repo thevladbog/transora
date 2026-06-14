@@ -1,0 +1,48 @@
+/*
+ * Form field contrast — inputs must stay visible on surface AND in overlays (modals).
+ * Loaded after global.css; overrides transparent field-border from theme when needed.
+ */
+
+:root,
+[data-theme="light"],
+.dark,
+[data-theme="dark"] {
+  --transora-field-bg: var(--surface-secondary);
+  --transora-field-border: var(--border);
+  --transora-field-bg-overlay: var(--default);
+  --transora-field-border-overlay: var(--border);
+}
+
+/* Global fields (pages, cards) */
+:root,
+[data-theme="light"],
+.dark,
+[data-theme="dark"] {
+  --field-background: var(--transora-field-bg);
+  --field-border: var(--transora-field-border);
+  --border-width-field: 1px;
+}
+
+/* Floating overlays: extra contrast vs modal/popover surface */
+.modal__dialog,
+.alert-dialog__dialog,
+.popover,
+.select__popover {
+  --field-background: var(--transora-field-bg-overlay);
+  --field-border: var(--transora-field-border-overlay);
+  --border-width-field: 1px;
+}
+
+.transora-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.transora-form-field [data-slot="label"],
+.transora-form-field .label {
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+}

@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
+      '@': path.resolve(dir, 'src'),
       '@transora/api-client': path.resolve(dir, '../../packages/api-client/src/index.ts'),
     },
   },

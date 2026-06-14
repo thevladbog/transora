@@ -3,6 +3,7 @@ package ru.transora.app.sales
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.transora.app.domain.DomainRuleViolation
+import ru.transora.app.hardware.FiscalReceiptLine
 import ru.transora.app.hardware.FiscalReceiptRequest
 import ru.transora.app.hardware.HardwareAgentClient
 import ru.transora.app.hardware.PrintTicketRequest
@@ -25,6 +26,7 @@ import ru.transora.sales.domain.Ticket
 import ru.transora.sales.domain.TicketStatus
 import ru.transora.scheduling.domain.Trip
 import java.time.Clock
+import java.time.Instant
 import java.util.UUID
 
 data class SaleItem(
@@ -35,6 +37,11 @@ data class SaleItem(
     val fromStopOrder: Int,
     val toStopOrder: Int,
     val quote: TariffQuote,
+    val nomenclatureAddons: List<PreparedNomenclatureLine> = emptyList(),
+)
+
+data class SaleNomenclatureContext(
+    val standalone: List<PreparedNomenclatureLine> = emptyList(),
 )
 
 @Service
@@ -53,6 +60,7 @@ class TicketSaleOrchestrator(
     private val outboxEventRepository: OutboxEventRepository,
     private val hardwareAgentClient: HardwareAgentClient,
     private val fiscalReceiptService: FiscalReceiptService,
+    private val orderNomenclatureRepository: OrderNomenclatureRepository,
 ) {
     @Transactional
     fun completeFromReservation(
@@ -100,6 +108,7 @@ class TicketSaleOrchestrator(
             trip = trip,
             items = listOf(saleItem),
             paymentType = PaymentType.valueOf(paymentType.trim().uppercase()),
+            nomenclatureContext = SaleNomenclatureContext(),
         )
     }
 
@@ -109,6 +118,7 @@ class TicketSaleOrchestrator(
         trip: Trip,
         items: List<SaleItem>,
         paymentType: PaymentType,
+        nomenclatureContext: SaleNomenclatureContext = SaleNomenclatureContext(),
     ): OrderResult {
         if (items.isEmpty() || items.size > 10) {
             throw DomainRuleViolation("Order must contain 1 to 10 tickets (BR-SAL-004)")
@@ -116,7 +126,13 @@ class TicketSaleOrchestrator(
 
         val now = Clock.systemUTC().instant()
         val orderId = UUID.randomUUID()
-        val totalCents = items.sumOf { it.quote.priceCents }
+        val ticketTotalCents = items.sumOf { it.quote.priceCents }
+        val addonTotalCents = items.sumOf { item ->
+            item.nomenclatureAddons.sumOf { it.unitPriceCents * it.quantity }
+        }
+        val standaloneTotalCents = nomenclatureContext.standalone.sumOf { it.unitPriceCents * it.quantity }
+        val totalCents = ticketTotalCents + addonTotalCents + standaloneTotalCents
+        val fiscalLines = buildFiscalLines(items, nomenclatureContext.standalone)
 
         orderRepository.insert(
             Order(
@@ -150,6 +166,7 @@ class TicketSaleOrchestrator(
                     amountCents = totalCents,
                     cashierName = shift.cashierName,
                     description = "Order $orderId (${items.size} tickets)",
+                    lines = fiscalLines,
                 ),
             )
         } catch (ex: Exception) {
@@ -168,9 +185,10 @@ class TicketSaleOrchestrator(
         items.forEach { item ->
             reservationService.confirm(item.reservation.id)
 
+            val orderItemId = UUID.randomUUID()
             orderItemRepository.insert(
                 OrderItem(
-                    id = UUID.randomUUID(),
+                    id = orderItemId,
                     orderId = orderId,
                     reservationId = item.reservation.id,
                     tripId = trip.id,
@@ -183,6 +201,13 @@ class TicketSaleOrchestrator(
                     tariffId = item.quote.tariffId,
                     priceCents = item.quote.priceCents,
                 ),
+            )
+
+            persistNomenclatureLines(
+                orderId = orderId,
+                orderItemId = orderItemId,
+                lines = item.nomenclatureAddons,
+                now = now,
             )
 
             val ticket = Ticket(
@@ -238,6 +263,13 @@ class TicketSaleOrchestrator(
             )
         }
 
+        persistNomenclatureLines(
+            orderId = orderId,
+            orderItemId = null,
+            lines = nomenclatureContext.standalone,
+            now = now,
+        )
+
         orderRepository.updateStatus(orderId, OrderStatus.PAID, now)
         outboxEventRepository.append(
             aggregateType = "order",
@@ -264,5 +296,69 @@ class TicketSaleOrchestrator(
             tickets = tickets,
             paymentTransactionId = transactionId,
         )
+    }
+
+    private fun buildFiscalLines(
+        items: List<SaleItem>,
+        standalone: List<PreparedNomenclatureLine>,
+    ): List<FiscalReceiptLine> {
+        val lines = mutableListOf<FiscalReceiptLine>()
+        items.forEach { item ->
+            lines += FiscalReceiptLine(
+                printName = "Билет ${item.reservation.seatNumber}",
+                quantity = 1,
+                priceCents = item.quote.priceCents,
+                paymentObject = 4,
+                paymentMethod = 4,
+                vatTag = 6,
+                measureCode = 0,
+            )
+            item.nomenclatureAddons.forEach { addon ->
+                lines += addon.toFiscalLine()
+            }
+        }
+        standalone.forEach { line ->
+            lines += line.toFiscalLine()
+        }
+        return lines
+    }
+
+    private fun PreparedNomenclatureLine.toFiscalLine(): FiscalReceiptLine =
+        FiscalReceiptLine(
+            printName = item.printName,
+            quantity = quantity,
+            priceCents = unitPriceCents,
+            paymentObject = item.ffdPaymentObject,
+            paymentMethod = item.ffdPaymentMethod,
+            vatTag = item.ffdVatTag,
+            measureCode = item.ffdMeasureCode,
+        )
+
+    private fun persistNomenclatureLines(
+        orderId: UUID,
+        orderItemId: UUID?,
+        lines: List<PreparedNomenclatureLine>,
+        now: Instant,
+    ) {
+        lines.forEach { line ->
+            orderNomenclatureRepository.insert(
+                OrderNomenclatureLineRow(
+                    id = UUID.randomUUID(),
+                    orderId = orderId,
+                    orderItemId = orderItemId,
+                    nomenclatureItemId = line.item.id,
+                    quantity = line.quantity,
+                    unitPriceCents = line.unitPriceCents,
+                    totalPriceCents = line.unitPriceCents * line.quantity,
+                    status = ru.transora.sales.domain.OrderNomenclatureLineStatus.ACTIVE,
+                    printName = line.item.printName,
+                    ffdPaymentObject = line.item.ffdPaymentObject,
+                    ffdPaymentMethod = line.item.ffdPaymentMethod,
+                    ffdVatTag = line.item.ffdVatTag,
+                    ffdMeasureCode = line.item.ffdMeasureCode,
+                    createdAt = now,
+                ),
+            )
+        }
     }
 }

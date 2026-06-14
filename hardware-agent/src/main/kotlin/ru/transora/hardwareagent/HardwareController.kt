@@ -39,12 +39,31 @@ class HardwareController {
         PrintTicketResponse(ticketId = request.ticketId, printed = true)
 }
 
+data class FiscalReceiptLine(
+    val printName: String,
+    val quantity: Int,
+    val priceCents: Long,
+    val paymentObject: Int,
+    val paymentMethod: Int,
+    val vatTag: Int,
+    val measureCode: Int = 0,
+)
+
 data class FiscalReceiptRequest(
     val operationId: UUID,
     val amountCents: Long,
     val cashierName: String,
     val description: String,
-)
+    val lines: List<FiscalReceiptLine> = emptyList(),
+) {
+    init {
+        if (lines.isNotEmpty()) {
+            require(lines.sumOf { it.priceCents * it.quantity } == amountCents) {
+                "amountCents must match sum of fiscal lines"
+            }
+        }
+    }
+}
 
 data class ShiftZReportRequest(
     val shiftId: UUID,

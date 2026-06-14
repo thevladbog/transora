@@ -1,0 +1,9 @@
+{
+  "title": "Dispatcher",
+  "description": "Transit gates and sales restrictions",
+  "tripId": "Trip",
+  "status": "Status",
+  "openedAt": "Opened",
+  "loadError": "Failed to load data",
+  "empty": "No active transit gates"
+}

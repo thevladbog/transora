@@ -36,7 +36,7 @@ class RefundRepository(
     fun findTiersByPolicyId(policyId: UUID): List<RefundPolicyTier> =
         jdbc.query(
             """
-            SELECT * FROM sales.refund_policy_tiers
+            SELECT * FROM sales.policy_tiers
             WHERE policy_id = ?
             ORDER BY sort_order
             """.trimIndent(),
@@ -46,7 +46,7 @@ class RefundRepository(
 
     fun serviceFeeCents(policyId: UUID): Long =
         jdbc.queryForObject(
-            "SELECT service_fee_cents FROM sales.refund_policies WHERE id = ?",
+            "SELECT service_fee_cents FROM sales.commerce_policies WHERE id = ?",
             Long::class.java,
             policyId,
         ) ?: 0L

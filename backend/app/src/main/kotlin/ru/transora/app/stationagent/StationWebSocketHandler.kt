@@ -7,12 +7,14 @@ import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import ru.transora.app.scheduling.StationAgentStatusRepository
 import java.util.UUID
 
 @Component
 class StationWebSocketHandler(
     private val sessionRegistry: StationAgentSessionRegistry,
     private val syncService: StationSyncService,
+    private val agentStatusRepository: StationAgentStatusRepository,
     private val objectMapper: ObjectMapper,
 ) : TextWebSocketHandler() {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -24,6 +26,7 @@ class StationWebSocketHandler(
                 return
             }
         sessionRegistry.register(stationId, session)
+        agentStatusRepository.upsertConnected(stationId, connected = true, agentVersion = null)
         log.info("Station agent connected for station {}", stationId)
     }
 
@@ -38,7 +41,8 @@ class StationWebSocketHandler(
         }
         when (envelope.type) {
             "sync.request" -> handleSyncRequest(session, stationId, envelope.payload)
-            "pong", "agent.status" -> Unit
+            "pong" -> agentStatusRepository.touch(stationId, null)
+            "agent.status" -> handleAgentStatus(stationId, envelope.payload)
             else -> log.debug("Ignoring station agent message type {}", envelope.type)
         }
     }
@@ -47,7 +51,15 @@ class StationWebSocketHandler(
         val stationId = session.attributes[StationWebSocketHandshakeInterceptor.ATTR_STATION_ID] as? UUID
             ?: return
         sessionRegistry.unregister(stationId, session)
+        agentStatusRepository.upsertConnected(stationId, connected = false, agentVersion = null)
         log.info("Station agent disconnected for station {} ({})", stationId, status)
+    }
+
+    private fun handleAgentStatus(stationId: UUID, payload: Any) {
+        val status = runCatching {
+            objectMapper.convertValue(payload, AgentStatusPayload::class.java)
+        }.getOrNull()
+        agentStatusRepository.touch(stationId, status?.version)
     }
 
     private fun handleSyncRequest(session: WebSocketSession, stationId: UUID, payload: Any) {

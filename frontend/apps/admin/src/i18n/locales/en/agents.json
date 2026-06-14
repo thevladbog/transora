@@ -1,0 +1,20 @@
+{
+  "titleNetwork": "Network agents",
+  "descriptionNetwork": "Station-agent status across all branches",
+  "titleStation": "Agents",
+  "descriptionStation": "Station-agent and display boards for current branch",
+  "stationAgentDescription": "Local gateway at the station site",
+  "online": "Online",
+  "offline": "Offline",
+  "lastSeen": "Last seen",
+  "version": "Version",
+  "syncForce": "Force sync",
+  "loadError": "Failed to load status",
+  "emptyNetwork": "No branches",
+  "displayBoards": "Display boards",
+  "displayBoardsEmpty": "No registered display boards",
+  "displayBoardsLoadError": "Failed to load display boards",
+  "boardName": "Name",
+  "boardType": "Type",
+  "platform": "Platform"
+}

@@ -1,12 +1,14 @@
 agent:
-  station_id: "00000000-0000-0000-0000-000000000001"
+  station_id: ""   # filled after provision
   listen: ":8081"
   log_level: info
+  label: "station-agent"
 
 core:
   websocket_url: "ws://localhost:8080/ws/stations"
   http_url: "http://localhost:8080"
   auth_token: ""
+  registration_code: ""   # one-time TR-XXXX-XXXX from super-admin
   login: "station_agent"
   password: "station_agent"
   ping_interval_sec: 30

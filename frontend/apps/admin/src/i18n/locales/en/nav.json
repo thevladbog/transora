@@ -1,0 +1,23 @@
+{
+  "dashboard": "Dashboard",
+  "users": "Users",
+  "stations": "Branches",
+  "agents": "Agents",
+  "trips": "Trips / board",
+  "dispatcher": "Dispatcher",
+  "announcements": "Announcements",
+  "settings": "Settings",
+  "switchStation": "Branch",
+  "serviceTokens": "Service tokens",
+  "reference": "Reference",
+  "points": "Points",
+  "nomenclature": "Nomenclature",
+  "refundPolicies": "Policies",
+  "tariffProfiles": "Tariffs",
+  "audit": "Audit log",
+  "reports": "Reports",
+  "logout": "Log out",
+  "superuser": "Superuser",
+  "placeholderTitle": "Work in progress",
+  "placeholderDescription": "This section is under development."
+}

@@ -34,6 +34,7 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/auth/login", "/auth/refresh", "/auth/jwks.json").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/stations/provision").permitAll()
                     .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                     .requestMatchers("/docs/**", "/docs", "/v3/api-docs", "/v3/api-docs/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/board/**").permitAll()

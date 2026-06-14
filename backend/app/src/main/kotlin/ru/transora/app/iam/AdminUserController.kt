@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import ru.transora.app.iam.security.RequirePermission
+import ru.transora.app.iam.security.StationScope
 import ru.transora.app.iam.security.currentPrincipal
 import ru.transora.iam.domain.IamUser
 import ru.transora.iam.domain.UserType
@@ -31,8 +33,22 @@ class AdminUserController(
 ) {
     @GetMapping
     @RequirePermission(Permissions.USERS_VIEW)
-    fun list(): List<UserSummaryResponse> =
-        userRepository.listAll().map { it.toSummary() }
+    fun list(@RequestParam(required = false) stationId: UUID?): List<UserSummaryResponse> {
+        val principal = currentPrincipal() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
+        val filterStationId = stationId ?: StationScope.currentStationId()
+        val users = userRepository.listAll()
+        if (filterStationId == null) {
+            if (!principal.isSuperuser) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Station context required")
+            }
+            return users.map { it.toSummary() }
+        }
+        val assignedUserIds = users.mapNotNull { user ->
+            val assignments = stationAssignmentRepository.activeAssignmentsForUser(user.id)
+            if (assignments.any { it.stationId == filterStationId }) user.id else null
+        }.toSet()
+        return users.filter { it.id in assignedUserIds }.map { it.toSummary() }
+    }
 
     @GetMapping("/{userId}")
     @RequirePermission(Permissions.USERS_VIEW)
@@ -75,6 +91,9 @@ class AdminUserController(
         val principal = currentPrincipal() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED)
         val role = roleRepository.findByCode(request.roleCode)
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown role ${request.roleCode}")
+        if (!principal.isSuperuser) {
+            StationScope.assertStationAccess(request.stationId)
+        }
         val assignmentId = stationAssignmentRepository.assign(userId, request.stationId, role.id, principal.userId)
         val view = stationAssignmentRepository.activeAssignmentsForUser(userId)
             .first { it.assignmentId == assignmentId }

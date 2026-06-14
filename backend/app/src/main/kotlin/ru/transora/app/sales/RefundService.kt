@@ -25,6 +25,7 @@ class RefundService(
     private val shiftRepository: ShiftRepository,
     private val tripRepository: TripRepository,
     private val fiscalReceiptService: FiscalReceiptService,
+    private val commercePolicyResolver: CommercePolicyResolver,
 ) {
     @Transactional
     fun refundTicket(ticketId: UUID, refundType: RefundType = RefundType.CASH): RefundResult {
@@ -39,6 +40,9 @@ class RefundService(
         if (!preview.refundAllowed) {
             throw DomainRuleViolation("Refund is not allowed for this ticket under PP RF 112 policy")
         }
+
+        val policyId = preview.policyId
+            ?: commercePolicyResolver.resolveTicketRefundPolicyId(ticket.tripId)
 
         val shift = shiftRepository.findById(ticket.shiftId)
         val trip = tripRepository.findById(ticket.tripId)
@@ -60,7 +64,7 @@ class RefundService(
         val refund = Refund(
             id = UUID.randomUUID(),
             ticketId = ticket.id,
-            policyId = RefundRepository.DEFAULT_POLICY_ID,
+            policyId = policyId,
             penaltyPercent = preview.penaltyPercent,
             penaltyCents = preview.penaltyCents,
             serviceFeeCents = preview.serviceFeeCents,

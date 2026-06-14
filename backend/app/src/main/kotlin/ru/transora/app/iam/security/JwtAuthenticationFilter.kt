@@ -42,6 +42,10 @@ class JwtAuthenticationFilter(
                     return
                 }
                 val stationHeader = request.getHeader("X-Station-ID")?.let(UUID::fromString)
+                if (stationHeader != null && principal.stationId != null && stationHeader != principal.stationId) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Station context mismatch")
+                    return
+                }
                 val resolved = principal.withStation(stationHeader)
                 val auth = UsernamePasswordAuthenticationToken(
                     resolved,

@@ -1,0 +1,11 @@
+{
+  "name": "@transora/super-admin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @transora/admin dev:network",
+    "build": "pnpm --filter @transora/admin build:network",
+    "preview": "pnpm --filter @transora/admin preview"
+  }
+}

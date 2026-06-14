@@ -9,7 +9,26 @@ Go sidecar for a bus station LAN: persistent WebSocket to core, SQLite schedule 
 
 ## Authentication
 
-**Auto-login (recommended for dev/docker):**
+### Provisioning (production)
+
+1. In **super-admin**, create a branch and generate a provisioning code (`TR-XXXX-XXXX`).
+2. On the station LAN machine, set in `config.yaml`:
+
+```yaml
+agent:
+  station_id: ""
+core:
+  http_url: "https://api.transora.example.com"
+  registration_code: "TR-XXXX-XXXX"
+```
+
+Or env: `REGISTRATION_CODE`, `CORE_HTTP_URL`.
+
+3. Start the agent — it calls `POST /api/stations/provision`, saves credentials to `provisioned.yaml` next to the config, and connects with the issued service token.
+
+Subsequent restarts load `provisioned.yaml` automatically; clear `registration_code` after first success.
+
+### Auto-login (dev/docker)
 
 ```yaml
 core:

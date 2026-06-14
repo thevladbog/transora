@@ -18,6 +18,7 @@ type AgentConfig struct {
 	StationID string `yaml:"station_id"`
 	Listen    string `yaml:"listen"`
 	LogLevel  string `yaml:"log_level"`
+	Label     string `yaml:"label"`
 }
 
 type CoreConfig struct {
@@ -26,6 +27,7 @@ type CoreConfig struct {
 	AuthToken           string `yaml:"auth_token"`
 	Login               string `yaml:"login"`
 	Password            string `yaml:"password"`
+	RegistrationCode    string `yaml:"registration_code"`
 	PingIntervalSec     int    `yaml:"ping_interval_sec"`
 	PingTimeoutSec      int    `yaml:"ping_timeout_sec"`
 	ReconnectMinSec     int    `yaml:"reconnect_min_sec"`
@@ -91,6 +93,9 @@ func applyEnv(cfg *Config) {
 	}
 	if v := os.Getenv("CORE_PASSWORD"); v != "" {
 		cfg.Core.Password = v
+	}
+	if v := os.Getenv("REGISTRATION_CODE"); v != "" {
+		cfg.Core.RegistrationCode = v
 	}
 	if v := os.Getenv("BOARDING_BUFFER_DB"); v != "" {
 		cfg.Boarding.BufferDBPath = v

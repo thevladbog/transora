@@ -16,6 +16,7 @@ import (
 	"github.com/transora/station-agent/internal/boarding"
 	"github.com/transora/station-agent/internal/cache"
 	"github.com/transora/station-agent/internal/config"
+	"github.com/transora/station-agent/internal/provision"
 	"github.com/transora/station-agent/internal/core"
 	"github.com/transora/station-agent/internal/mode"
 	"github.com/transora/station-agent/internal/playback"
@@ -31,6 +32,14 @@ func main() {
 	cfg, err := config.Load(*configPath)
 	if err != nil {
 		log.Fatalf("load config: %v", err)
+	}
+
+	provision.LoadPersisted(*configPath, cfg)
+	if err := provision.ApplyIfNeeded(cfg, *configPath); err != nil {
+		log.Fatalf("provision: %v", err)
+	}
+	if cfg.Core.RegistrationCode != "" && cfg.Agent.StationID != "" {
+		log.Printf("provisioned station %s", cfg.Agent.StationID)
 	}
 
 	tokenProvider := auth.NewTokenProvider(cfg.Core, cfg.Agent.StationID)

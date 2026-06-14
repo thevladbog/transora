@@ -111,5 +111,27 @@ class InvalidTokenException(message: String) : RuntimeException(message)
 fun List<ru.transora.iam.domain.StationAssignmentView>.flattenPermissions(): Set<String> =
     flatMap { it.permissions }.toSet()
 
-fun AuthenticatedUser.withStation(stationId: UUID?): AuthenticatedUser =
-    copy(stationId = stationId ?: assignments.firstOrNull()?.stationId)
+fun effectivePermissions(
+    isSuperuser: Boolean,
+    assignments: List<ru.transora.iam.domain.StationAssignmentView>,
+    stationId: UUID?,
+): Set<String> {
+    if (isSuperuser) {
+        return ru.transora.iam.permissions.RolePermissionMatrix.allPermissions
+    }
+    if (stationId == null) {
+        return emptySet()
+    }
+    return assignments.firstOrNull { it.stationId == stationId }?.permissions ?: emptySet()
+}
+
+fun AuthenticatedUser.withStation(stationId: UUID?): AuthenticatedUser {
+    if (isSuperuser) {
+        return copy(stationId = stationId)
+    }
+    val resolved = stationId ?: this.stationId ?: assignments.firstOrNull()?.stationId
+    return copy(
+        stationId = resolved,
+        permissions = effectivePermissions(isSuperuser, assignments, resolved),
+    )
+}

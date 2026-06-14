@@ -1,0 +1,20 @@
+{
+  "titleNetwork": "Агенты сети",
+  "descriptionNetwork": "Статус station-agent по всем филиалам",
+  "titleStation": "Агенты",
+  "descriptionStation": "Station-agent и табло текущего филиала",
+  "stationAgentDescription": "Локальный шлюз на площадке вокзала",
+  "online": "Online",
+  "offline": "Offline",
+  "lastSeen": "Последняя активность",
+  "version": "Версия",
+  "syncForce": "Принудительная синхронизация",
+  "loadError": "Не удалось загрузить статус",
+  "emptyNetwork": "Нет филиалов",
+  "displayBoards": "Табло",
+  "displayBoardsEmpty": "Нет зарегистрированных табло",
+  "displayBoardsLoadError": "Не удалось загрузить табло",
+  "boardName": "Название",
+  "boardType": "Тип",
+  "platform": "Платформа"
+}

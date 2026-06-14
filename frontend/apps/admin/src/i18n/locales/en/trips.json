@@ -1,0 +1,10 @@
+{
+  "title": "Trips",
+  "description": "Schedule for the current branch",
+  "route": "Route",
+  "departure": "Departure",
+  "status": "Status",
+  "platform": "Platform",
+  "loadError": "Failed to load trips",
+  "empty": "No trips in the selected window"
+}

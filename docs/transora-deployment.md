@@ -1672,24 +1672,25 @@ kubectl rollout status deployment/$SERVICE -n transora-core
 ### 12.3 Чеклист подключения нового вокзала
 
 ```
-□ 1.  Создать запись в таблице scheduling.service_station
-□ 2.  Создать системного пользователя station-agent в IAM
-□ 3.  Выдать ServiceToken для station-agent (сохранить в config.yaml)
-□ 4.  Создать учётные записи для сотрудников вокзала (диспетчеры, кассиры)
-□ 5.  Настроить SalesRestriction (квоты мест) если нужно
-□ 6.  Установить station-agent на сервер вокзала
-□ 7.  Прописать station_id и ServiceToken в config.yaml
-□ 8.  Запустить station-agent, проверить /agent/status → ONLINE
-□ 9.  Убедиться в заполненном кеше: cache.trips_count > 0
-□ 10. Зарегистрировать табло в notification-service
-□ 11. Настроить аудиосистему (station_audio_config)
-□ 12. Открыть табло в браузере, проверить рейсы
-□ 13. Установить hardware-agent на кассовые ПК
-□ 14. Подключить ККТ, терминал, принтер; проверить /status
-□ 15. Провести тестовую продажу и возврат
-□ 16. Установить boarding-app на ТСД, проверить сканирование
-□ 17. Добавить вокзал в мониторинг Grafana
+□ 1.  Суперадминка: создать филиал (ServiceStation) + сгенерировать код TR-XXXX-XXXX
+□ 2.  На LAN вокзала: установить station-agent, указать core.http_url и registration_code
+□ 3.  Запустить agent — автоматический POST /api/stations/provision → provisioned.yaml
+□ 4.  Проверить в суперадминке: agent online; локально GET :8081/agent/status
+□ 5.  Создать учётные записи сотрудников и assignments на филиал (суперадминка / station admin)
+□ 6.  Задеплоить station admin static (VITE_APP_TIER=station, VITE_API_URL) при необходимости
+□ 7.  Зарегистрировать табло (POST /api/display-boards/register)
+□ 8.  Проверить cache.trips_count > 0 после sync
+□ 9.  Тестовая продажа / посадка / объявления
+□ 10. Добавить филиал в мониторинг Grafana
 ```
+
+Docker Compose (dev/staging):
+
+```bash
+REGISTRATION_CODE=TR-XXXX-XXXX docker compose --profile station-site up -d station-agent
+```
+
+См. также [frontend-multi-host.md](frontend-multi-host.md) и [station-agent/README.md](../station-agent/README.md).
 
 ### 12.4 Диагностика типовых проблем
 

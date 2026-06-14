@@ -51,6 +51,20 @@ class FiscalReceiptService(
         return receiptId
     }
 
+    fun recordNomenclatureRefund(
+        shiftId: UUID,
+        amountCents: Long,
+        result: FiscalReceiptResult,
+    ): UUID =
+        insertReceipt(
+            shiftId = shiftId,
+            orderId = null,
+            refundId = null,
+            receiptType = FiscalReceiptType.REFUND,
+            amountCents = amountCents,
+            result = result,
+        )
+
     fun recordZReport(
         shiftId: UUID,
         summary: ShiftFiscalSummary,

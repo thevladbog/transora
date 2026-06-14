@@ -7,7 +7,11 @@ import org.springframework.http.server.ServletServerHttpRequest
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.server.HandshakeInterceptor
+import ru.transora.app.iam.ServiceTokenRepository
+import ru.transora.app.iam.StationAssignmentRepository
 import ru.transora.app.iam.TokenBlacklistService
+import ru.transora.app.iam.TokenHashing
+import ru.transora.app.iam.UserRepository
 import ru.transora.app.iam.security.InvalidTokenException
 import ru.transora.app.iam.security.JwtService
 import ru.transora.iam.permissions.RoleCodes
@@ -17,6 +21,9 @@ import java.util.UUID
 class StationWebSocketHandshakeInterceptor(
     private val jwtService: JwtService,
     private val tokenBlacklistService: TokenBlacklistService,
+    private val serviceTokenRepository: ServiceTokenRepository,
+    private val userRepository: UserRepository,
+    private val stationAssignmentRepository: StationAssignmentRepository,
 ) : HandshakeInterceptor {
     override fun beforeHandshake(
         request: ServerHttpRequest,
@@ -37,6 +44,10 @@ class StationWebSocketHandshakeInterceptor(
         val stationId = runCatching { UUID.fromString(stationHeader) }.getOrNull()
             ?: return reject(response, "Invalid X-Station-ID")
 
+        if (token.startsWith("st_")) {
+            return authenticateServiceToken(token, stationId, response, attributes)
+        }
+
         return try {
             val principal = jwtService.parseAccessToken(token)
             if (tokenBlacklistService.isBlacklisted(principal.jti)) {
@@ -51,6 +62,32 @@ class StationWebSocketHandshakeInterceptor(
         } catch (_: InvalidTokenException) {
             reject(response, "Invalid token")
         }
+    }
+
+    private fun authenticateServiceToken(
+        token: String,
+        stationId: UUID,
+        response: ServerHttpResponse,
+        attributes: MutableMap<String, Any>,
+    ): Boolean {
+        val record = serviceTokenRepository.findActiveByHash(TokenHashing.sha256(token))
+            ?: return reject(response, "Invalid token")
+        val user = userRepository.findById(record.userId)
+            ?: return reject(response, "Invalid token")
+        if (!user.isActive) {
+            return reject(response, "Invalid token")
+        }
+        val assignments = stationAssignmentRepository.activeAssignmentsForUser(user.id)
+        val hasAgentRole = assignments.any {
+            it.stationId == stationId && it.roleCode == RoleCodes.STATION_AGENT
+        }
+        if (!hasAgentRole) {
+            return reject(response, "STATION_AGENT role required")
+        }
+        serviceTokenRepository.updateLastUsed(record.id)
+        attributes[ATTR_STATION_ID] = stationId
+        attributes[ATTR_USER_ID] = user.id
+        return true
     }
 
     override fun afterHandshake(

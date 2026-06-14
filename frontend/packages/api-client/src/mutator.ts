@@ -1,4 +1,4 @@
-import { getAccessToken, runLogout, runRefresh } from './auth-tokens';
+import { getAccessToken, getStationId, runLogout, runRefresh } from './auth-tokens';
 
 async function executeRequest<T>(
   url: string,
@@ -8,6 +8,10 @@ async function executeRequest<T>(
   const headers = new Headers(options.headers);
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
+  }
+  const currentStationId = getStationId();
+  if (currentStationId) {
+    headers.set('X-Station-ID', currentStationId);
   }
 
   const response = await fetch(url, {

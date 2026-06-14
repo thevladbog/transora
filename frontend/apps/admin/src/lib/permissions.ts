@@ -24,6 +24,7 @@ export const Permissions = {
   USERS_DEACTIVATE: 'users:deactivate',
   REPORTS_VIEW_STATION: 'reports:view_station',
   REPORTS_VIEW_NETWORK: 'reports:view_network',
+  STATIONS_MANAGE: 'stations:manage',
   SETTINGS_MANAGE_TARIFFS: 'settings:manage_tariffs',
 } as const;
 

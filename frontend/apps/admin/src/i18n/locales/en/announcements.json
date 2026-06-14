@@ -1,0 +1,13 @@
+{
+  "title": "Announcements",
+  "description": "Announcement queue for the current branch",
+  "text": "Text",
+  "priority": "Priority",
+  "status": "Status",
+  "pause": "Pause",
+  "resume": "Resume",
+  "paused": "Paused",
+  "active": "Active",
+  "loadError": "Failed to load queue",
+  "empty": "Queue is empty"
+}

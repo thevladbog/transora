@@ -1,8 +1,10 @@
 const REFRESH_TOKEN_KEY = 'transora_refresh_token';
 
 let accessToken: string | null = null;
+let stationId: string | null = null;
 let refreshHandler: (() => Promise<string | null>) | null = null;
 let logoutHandler: (() => void) | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 
 export function getAccessToken(): string | null {
   return accessToken;
@@ -29,9 +31,18 @@ export function setTokenPair(access: string, refresh: string): void {
   setRefreshToken(refresh);
 }
 
+export function getStationId(): string | null {
+  return stationId;
+}
+
+export function setStationId(id: string | null): void {
+  stationId = id;
+}
+
 export function clearTokens(): void {
   setAccessToken(null);
   setRefreshToken(null);
+  setStationId(null);
 }
 
 export function setRefreshHandler(handler: (() => Promise<string | null>) | null): void {
@@ -46,7 +57,12 @@ export async function runRefresh(): Promise<string | null> {
   if (!refreshHandler) {
     return null;
   }
-  return refreshHandler();
+
+  refreshPromise ??= refreshHandler().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
 }
 
 export function runLogout(): void {

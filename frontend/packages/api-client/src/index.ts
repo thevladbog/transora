@@ -1,4 +1,14 @@
 export * from './generated/model';
 export * from './generated/endpoints/auth/auth';
+export * from './generated/endpoints/admin-users/admin-users';
+export * from './generated/endpoints/admin-tariffs/admin-tariffs';
+export * from './generated/endpoints/admin-refund-policies/admin-refund-policies';
+export * from './generated/endpoints/routes/routes';
+export * from './generated/endpoints/trips/trips';
+export * from './generated/endpoints/announcements/announcements';
+export * from './generated/endpoints/dispatcher/dispatcher';
+export * from './admin-catalog';
+export * from './admin-stations';
+export * from './auth-stations';
 export * from './auth-tokens';
 export { customInstance } from './mutator';

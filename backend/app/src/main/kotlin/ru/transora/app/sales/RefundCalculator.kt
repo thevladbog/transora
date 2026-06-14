@@ -1,9 +1,9 @@
 package ru.transora.app.sales
 
 import org.springframework.stereotype.Service
+import ru.transora.app.admin.NomenclatureAdminRepository
 import ru.transora.app.domain.DomainRuleViolation
 import ru.transora.app.scheduling.TripRepository
-import ru.transora.sales.domain.RefundPolicyTier
 import ru.transora.sales.domain.RefundPreview
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -14,47 +14,94 @@ import java.util.UUID
 
 @Service
 class RefundCalculator(
-    private val refundRepository: RefundRepository,
+    private val commercePolicyRepository: CommercePolicyRepository,
+    private val commercePolicyResolver: CommercePolicyResolver,
+    private val policyPriceCalculator: PolicyPriceCalculator,
     private val tripRepository: TripRepository,
+    private val nomenclatureAdminRepository: NomenclatureAdminRepository,
 ) {
     fun preview(ticketPriceCents: Long, tripId: UUID, refundAt: Instant = Clock.systemUTC().instant()): RefundPreview {
-        val trip = tripRepository.findById(tripId)
-            ?: throw NoSuchElementException("Trip $tripId was not found")
-        val policyId = RefundRepository.DEFAULT_POLICY_ID
-        val tiers = refundRepository.findTiersByPolicyId(policyId)
-        val serviceFeeCents = refundRepository.serviceFeeCents(policyId)
-        val hoursUntilDeparture = Duration.between(refundAt, trip.departureTime).toMinutes() / 60.0
-        val tier = resolveTier(tiers, hoursUntilDeparture)
-            ?: throw DomainRuleViolation("No refund tier applies for this departure time")
+        val policyId = commercePolicyResolver.resolveTicketRefundPolicyId(tripId, refundAt)
+        return preview(ticketPriceCents, tripId, refundAt, policyId)
+    }
 
-        if (!tier.refundAllowed) {
+    fun previewForNomenclature(
+        itemPriceCents: Long,
+        tripId: UUID,
+        nomenclatureItemId: UUID,
+        refundAt: Instant = Clock.systemUTC().instant(),
+    ): RefundPreview {
+        val item = nomenclatureAdminRepository.findById(nomenclatureItemId)
+            ?: throw NoSuchElementException("Nomenclature item $nomenclatureItemId was not found")
+        if (!item.refundAllowed) {
             return RefundPreview(
-                penaltyPercent = tier.penaltyPercent,
-                penaltyCents = ticketPriceCents,
-                serviceFeeCents = serviceFeeCents,
+                penaltyPercent = BigDecimal.ZERO,
+                penaltyCents = itemPriceCents,
+                serviceFeeCents = 0,
                 refundCents = 0,
                 refundAllowed = false,
             )
         }
+        val policyId = item.refundPolicyId
+            ?: throw DomainRuleViolation("refund_policy_id is required when refund is allowed")
+        return preview(itemPriceCents, tripId, refundAt, policyId)
+    }
 
-        val penaltyCents = calculatePenaltyCents(ticketPriceCents, tier.penaltyPercent)
-        val refundCents = (ticketPriceCents - penaltyCents - serviceFeeCents).coerceAtLeast(0)
+    fun preview(
+        ticketPriceCents: Long,
+        tripId: UUID,
+        refundAt: Instant,
+        policyId: UUID,
+    ): RefundPreview {
+        val trip = tripRepository.findById(tripId)
+            ?: throw NoSuchElementException("Trip $tripId was not found")
+        val (policy, tier) = commercePolicyResolver.resolveRefundPolicyWithTier(policyId, tripId, refundAt)
+        val resolvedTier = tier
+            ?: throw DomainRuleViolation("No refund threshold applies for this departure time")
+
+        if (!resolvedTier.refundAllowed) {
+            return RefundPreview(
+                penaltyPercent = resolvedTier.penaltyPercent,
+                penaltyCents = ticketPriceCents,
+                serviceFeeCents = commissionCents(policy, resolvedTier, ticketPriceCents, 0),
+                refundCents = 0,
+                refundAllowed = false,
+                policyId = policyId,
+            )
+        }
+
+        val penaltyCents = calculatePenaltyCents(ticketPriceCents, resolvedTier.penaltyPercent)
+        val grossRefund = (ticketPriceCents - penaltyCents).coerceAtLeast(0)
+        val commission = commissionCents(policy, resolvedTier, ticketPriceCents, grossRefund)
+        val refundCents = (grossRefund - commission).coerceAtLeast(0)
 
         return RefundPreview(
-            penaltyPercent = tier.penaltyPercent,
+            penaltyPercent = resolvedTier.penaltyPercent,
             penaltyCents = penaltyCents,
-            serviceFeeCents = serviceFeeCents,
+            serviceFeeCents = commission,
             refundCents = refundCents,
             refundAllowed = true,
+            policyId = policyId,
         )
     }
 
-    private fun resolveTier(tiers: List<RefundPolicyTier>, hoursUntilDeparture: Double): RefundPolicyTier? =
-        tiers.firstOrNull { tier ->
-            val minOk = tier.hoursBeforeMin?.let { hoursUntilDeparture >= it } ?: (hoursUntilDeparture < 0)
-            val maxOk = tier.hoursBeforeMax?.let { hoursUntilDeparture < it } ?: true
-            minOk && maxOk
+    private fun commissionCents(
+        policy: CommercePolicyRow,
+        tier: CommercePolicyTierRow,
+        routePriceCents: Long,
+        refundAmountCents: Long,
+    ): Long {
+        val hasPolicyPricing = policy.nomenclatureItemId != null ||
+            policy.pricingMode != ru.transora.sales.domain.PolicyPricingMode.FROM_NOMENCLATURE ||
+            policy.fixedPriceCents != null ||
+            policy.percentValue != null
+        if (!hasPolicyPricing) {
+            return commercePolicyRepository.serviceFeeCents(policy.id)
         }
+        return runCatching {
+            policyPriceCalculator.unitPriceCents(policy, tier, routePriceCents, refundAmountCents)
+        }.getOrElse { commercePolicyRepository.serviceFeeCents(policy.id) }
+    }
 
     private fun calculatePenaltyCents(priceCents: Long, penaltyPercent: BigDecimal): Long =
         BigDecimal(priceCents)

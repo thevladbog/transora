@@ -134,4 +134,5 @@ data class RefundPreview(
     val serviceFeeCents: Long,
     val refundCents: Long,
     val refundAllowed: Boolean,
+    val policyId: java.util.UUID? = null,
 )

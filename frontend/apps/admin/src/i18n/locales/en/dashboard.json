@@ -1,0 +1,20 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome to the Transora control panel.",
+  "profile": "Profile",
+  "fullName": "Name",
+  "login": "Login",
+  "role": "Role",
+  "roleSuperuser": "System admin",
+  "roleStationScoped": "Station scoped",
+  "stationId": "Station ID",
+  "permissions": "Permissions ({{count}})",
+  "currentStation": "Current branch",
+  "agentOnline": "Station-agent online",
+  "agentOffline": "Station-agent offline",
+  "networkSummary": "Network summary",
+  "stationsTotal": "Branches",
+  "agentsOnline": "Agents online",
+  "agentsOffline": "Agents offline",
+  "tripsCount": "Trips (24h): {{count}}"
+}

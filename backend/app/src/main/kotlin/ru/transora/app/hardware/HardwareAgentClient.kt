@@ -3,11 +3,22 @@ package ru.transora.app.hardware
 import java.time.Instant
 import java.util.UUID
 
+data class FiscalReceiptLine(
+    val printName: String,
+    val quantity: Int,
+    val priceCents: Long,
+    val paymentObject: Int,
+    val paymentMethod: Int,
+    val vatTag: Int,
+    val measureCode: Int = 0,
+)
+
 data class FiscalReceiptRequest(
     val operationId: UUID,
     val amountCents: Long,
     val cashierName: String,
     val description: String,
+    val lines: List<FiscalReceiptLine> = emptyList(),
 )
 
 data class FiscalReceiptResult(

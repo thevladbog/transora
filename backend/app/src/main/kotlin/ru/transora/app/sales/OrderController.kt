@@ -29,6 +29,33 @@ class OrderController(
             CreateOrderRequest(
                 shiftId = request.shiftId,
                 tripId = request.tripId,
+                items = (request.items ?: emptyList()).map {
+                    OrderItemRequest(
+                        seatNumber = it.seatNumber,
+                        passengerName = it.passengerName,
+                        docType = it.docType,
+                        docNumber = it.docNumber,
+                        fromStopOrder = it.fromStopOrder,
+                        toStopOrder = it.toStopOrder,
+                        nomenclatureAddons = (it.nomenclatureAddons ?: emptyList()).map { addon ->
+                            NomenclatureAddonRequest(addon.nomenclatureItemId, addon.quantity)
+                        },
+                    )
+                }.ifEmpty {
+                    listOf(
+                        OrderItemRequest(
+                            seatNumber = request.seatNumber,
+                            passengerName = request.passengerName,
+                            docType = request.docType,
+                            docNumber = request.docNumber,
+                            fromStopOrder = request.fromStopOrder,
+                            toStopOrder = request.toStopOrder,
+                            nomenclatureAddons = (request.nomenclatureAddons ?: emptyList()).map { addon ->
+                                NomenclatureAddonRequest(addon.nomenclatureItemId, addon.quantity)
+                            },
+                        ),
+                    )
+                },
                 seatNumber = request.seatNumber,
                 passengerName = request.passengerName,
                 docType = request.docType,
@@ -36,6 +63,9 @@ class OrderController(
                 fromStopOrder = request.fromStopOrder,
                 toStopOrder = request.toStopOrder,
                 paymentType = request.paymentType,
+                standaloneNomenclature = (request.standaloneNomenclature ?: emptyList()).map {
+                    NomenclatureAddonRequest(it.nomenclatureItemId, it.quantity)
+                },
             ),
         )
         return OrderResponse(
@@ -61,6 +91,24 @@ data class CreateOrderRequestBody(
     @field:Min(1) val fromStopOrder: Int? = null,
     @field:Min(1) val toStopOrder: Int? = null,
     val paymentType: String = "CASH",
+    val items: List<OrderItemRequestBody>? = null,
+    val nomenclatureAddons: List<NomenclatureAddonRequestBody>? = null,
+    val standaloneNomenclature: List<NomenclatureAddonRequestBody>? = null,
+)
+
+data class OrderItemRequestBody(
+    @field:Min(1) val seatNumber: Int,
+    @field:NotBlank val passengerName: String,
+    @field:NotBlank val docType: String,
+    @field:NotBlank val docNumber: String,
+    @field:Min(1) val fromStopOrder: Int? = null,
+    @field:Min(1) val toStopOrder: Int? = null,
+    val nomenclatureAddons: List<NomenclatureAddonRequestBody>? = null,
+)
+
+data class NomenclatureAddonRequestBody(
+    @field:NotNull val nomenclatureItemId: UUID,
+    @field:Min(1) val quantity: Int,
 )
 
 data class OrderResponse(
