@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Button, Table } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { CreateScheduleRequestScheduleType } from '@transora/api-client';
 import { PermissionGate } from '@/components/layout/PermissionGate';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { QueryState } from '@/components/ui/QueryState';
@@ -11,25 +10,8 @@ import { Permissions } from '@/lib/permissions';
 import { useRoutesPricingList } from '@/features/routes/api/hooks';
 import { formatRouteLabel } from '@/features/routes/route-label';
 import { useSchedulesList } from './api/hooks';
+import { formatSchedulePeriod } from './schedule-format';
 import { GenerateTripsDialog } from './GenerateTripsDialog';
-
-function formatPeriod(
-  scheduleType: string,
-  validFrom: string | undefined,
-  validTo: string | undefined,
-  t: (key: string) => string,
-): string {
-  if (scheduleType === CreateScheduleRequestScheduleType.PERMANENT) {
-    return t('periodPermanent');
-  }
-  if (scheduleType === CreateScheduleRequestScheduleType.EXCEPTION) {
-    return validFrom ?? '—';
-  }
-  if (validFrom && validTo) {
-    return `${validFrom} — ${validTo}`;
-  }
-  return '—';
-}
 
 export function SchedulesListPage() {
   const { t } = useTranslation(['schedules', 'common']);
@@ -94,7 +76,7 @@ export function SchedulesListPage() {
                     <Table.Cell>{routeLabelById.get(item.routeId) ?? item.routeId}</Table.Cell>
                     <Table.Cell>{t(`schedules:type.${item.scheduleType}`)}</Table.Cell>
                     <Table.Cell className="font-mono text-sm">
-                      {formatPeriod(item.scheduleType, item.validFrom, item.validTo, (key) => t(`schedules:${key}`))}
+                      {formatSchedulePeriod(item.scheduleType, item.validFrom, item.validTo, (key) => t(`schedules:${key}`))}
                     </Table.Cell>
                     <Table.Cell>
                       <StatusChip active={item.isActive} />

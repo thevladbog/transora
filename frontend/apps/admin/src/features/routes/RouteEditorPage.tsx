@@ -12,6 +12,7 @@ import { TariffMatrixGrid } from '@/features/tariff-profiles/TariffMatrixGrid';
 import { Permissions } from '@/lib/permissions';
 import { useRoutePricing, useUpsertRouteMatrix } from './api/hooks';
 import { RouteMetaSection } from './RouteMetaSection';
+import { RouteSchedulesSection } from './RouteSchedulesSection';
 import { RouteStopsEditor } from './RouteStopsEditor';
 import { formatRouteLabel } from './route-label';
 
@@ -115,6 +116,7 @@ export function RouteEditorPage() {
         >
           {bundle ? (
             <>
+              <RouteSchedulesSection routeId={routeId} />
               <section className="flex flex-wrap items-center gap-3 rounded-xl border border-border p-4">
                 <h2 className="w-full text-base font-semibold">{t('routes:distanceKm')}</h2>
                 <Chip variant="secondary">{formatDistance(bundle.distanceKm, bundle.distanceSource, t)}</Chip>

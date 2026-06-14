@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import {
   CreateScheduleRequestScheduleType,
   type CreateScheduleRequest,
@@ -59,6 +59,8 @@ const defaultMeta = (): ScheduleMetaValues => ({
 
 export function ScheduleEditorPage() {
   const { scheduleId = '' } = useParams();
+  const [searchParams] = useSearchParams();
+  const presetRouteId = searchParams.get('routeId') ?? '';
   const navigate = useNavigate();
   const isNew = scheduleId === 'new';
   const { t } = useTranslation(['schedules', 'common']);
@@ -70,6 +72,12 @@ export function ScheduleEditorPage() {
   const [entries, setEntries] = useState<ScheduleEntryForm[]>([createEmptyScheduleEntry()]);
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(isNew);
+
+  useEffect(() => {
+    if (!isNew || !presetRouteId) return;
+    setMeta((current) => ({ ...current, routeId: presetRouteId }));
+    setDirty(true);
+  }, [isNew, presetRouteId]);
 
   useEffect(() => {
     if (isNew || !schedule) return;
@@ -195,7 +203,12 @@ export function ScheduleEditorPage() {
 
       {isNew ? (
         <>
-          <ScheduleMetaSection mode="create" values={meta} onChange={patchMeta} />
+          <ScheduleMetaSection
+            mode="create"
+            values={meta}
+            onChange={patchMeta}
+            routeLocked={Boolean(presetRouteId)}
+          />
           <ScheduleEntriesEditor entries={entries} onChange={patchEntries} />
         </>
       ) : (

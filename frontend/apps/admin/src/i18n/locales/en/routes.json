@@ -1,6 +1,6 @@
 {
   "title": "Routes",
-  "description": "Unified route editor: code, number, stops, price matrix, and policies.",
+  "description": "Unified route editor: code, stops, price matrix, and policies.",
   "create": "Create route",
   "createTitle": "New route",
   "editorTitle": "Route editor",
@@ -41,5 +41,9 @@
   "createHint": "After saving, stops, price matrix, and policies will become available.",
   "saveMetaFirst": "Save the route details first.",
   "policiesSection": "Policies",
-  "needTwoStops": "Add at least two stops for the price matrix"
+  "needTwoStops": "Add at least two stops for the price matrix",
+  "schedulesSection": "Schedules",
+  "schedulesEmpty": "No schedules found for this route",
+  "createSchedule": "Create schedule",
+  "viewAllSchedules": "All schedules"
 }
