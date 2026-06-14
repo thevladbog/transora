@@ -20,8 +20,14 @@ pnpm workspace: `apps/*`, `packages/*`. Node **24+** ([`.nvmrc`](frontend/.nvmrc
 ```bash
 pnpm install --ignore-scripts
 pnpm dev              # admin @ :5173
-pnpm api:sync         # fetch OpenAPI + orval (backend must be up)
+pnpm api:fetch        # curl live /v3/api-docs → openapi/transora.openapi.json (commit when API changes)
+pnpm api:generate     # orval from committed openapi
+pnpm api:sync         # fetch + generate
 ```
+
+**Orval is mandatory.** Do not hand-edit `packages/api-client/src/generated/**`. Hand-written clients (`admin-catalog.ts`, `admin-route-pricing.ts`, …) are temporary until endpoints appear in OpenAPI and `pnpm api:sync` regen covers them.
+
+After `api:fetch`, run `pnpm api:generate` and `pnpm exec tsc -b` in `apps/admin`. A larger live spec may rename Orval symbols (`list1` → `list2`); fix imports or add stable `operationId` on backend controllers before merging the openapi snapshot.
 
 ## Import aliases by package
 

@@ -1,17 +1,22 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Table } from '@heroui/react';
+import { Button, Table } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 import { list1 } from '@transora/api-client';
+import { PermissionGate } from '@/components/layout/PermissionGate';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { QueryState } from '@/components/ui/QueryState';
 import { useStationContext } from '@/features/stations/station-context';
+import { Permissions } from '@/lib/permissions';
+import { CreateTripFromRouteDrawer } from './CreateTripFromRouteDrawer';
 
 export function TripsListPage() {
   const { t } = useTranslation('trips');
   const { currentStation } = useStationContext();
   const stationCode = currentStation?.code;
+  const [createTripOpen, setCreateTripOpen] = useState(false);
 
-  const { data: trips, isLoading, isError } = useQuery({
+  const { data: trips, isLoading, isError, refetch } = useQuery({
     queryKey: ['trips', stationCode],
     queryFn: async () => {
       const response = await list1({ stationCode, limit: 100, horizonHours: 24 });
@@ -22,7 +27,25 @@ export function TripsListPage() {
 
   return (
     <div>
-      <PageHeader title={t('title')} description={t('description')} />
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <PermissionGate permission={Permissions.SCHEDULE_CREATE}>
+            <Button variant="primary" onPress={() => setCreateTripOpen(true)}>
+              {t('createTrip')}
+            </Button>
+          </PermissionGate>
+        }
+      />
+
+      <CreateTripFromRouteDrawer
+        isOpen={createTripOpen}
+        onOpenChange={setCreateTripOpen}
+        stationCode={stationCode}
+        onSuccess={() => void refetch()}
+      />
+
       <QueryState
         isLoading={isLoading}
         isError={isError}

@@ -16,6 +16,7 @@ The admin app (`frontend/apps/admin`) uses **@heroui/react v3**. All interactive
 | Select | `FormSelectField` | `<select>`, native dropdown |
 | Date (single) | `FormDatePicker` | `<input type="date">`, `FormTextField` with `type="date"` |
 | Date range (from/to) | `FormDateRangePicker` | Two separate `FormDatePicker` fields |
+| Time (HH:mm) | `FormTimeField` | `<input type="time">`, raw time text without wrapper |
 | Number | `FormNumberField` or `NumberField` | `<input type="number">` |
 | Toggle | `Switch` from HeroUI | `<input type="checkbox">` |
 | Buttons | `Button` from HeroUI | `<button>` with custom classes |
@@ -23,6 +24,7 @@ The admin app (`frontend/apps/admin`) uses **@heroui/react v3**. All interactive
 ## Date picker composition
 
 - Single date: `FormDatePicker` (`@/components/ui/FormDatePicker.tsx`)
+- Time: `FormTimeField` (`@/components/ui/FormTimeField.tsx`) — value `HH:mm`
 - **From/to pairs**: `FormDateRangePicker` (`@/components/ui/FormDateRangePicker.tsx`) — always use for validity periods; never two separate pickers
 - Both use `DatePicker`/`DateRangePicker` + `DateField` + `Calendar`/`RangeCalendar` from `@heroui/react`
 - Value/onChange: ISO date strings `YYYY-MM-DD` (via `@/lib/date-values`)

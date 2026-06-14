@@ -35,6 +35,12 @@ Wrap `@transora/api-client` functions in `features/*/api/hooks.ts` with React Qu
 
 New catalog endpoints live in `packages/api-client/src/admin-catalog.ts` until Orval regen.
 
+## API client (Orval)
+
+- **Always** use Orval — never edit `packages/api-client/src/generated/**` by hand.
+- After backend API changes: `pnpm api:sync` from `frontend/` (backend on `:8080`).
+- Domain hooks in `features/*/api/hooks.ts` wrap generated functions (`createFromRoute`, `list1`, …) with React Query; do not reimplement fetch.
+
 ## UI & i18n
 
 - HeroUI v3 + Tailwind v4

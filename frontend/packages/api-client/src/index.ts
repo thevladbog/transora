@@ -6,6 +6,8 @@ export * from './generated/endpoints/admin-refund-policies/admin-refund-policies
 export * from './generated/endpoints/routes/routes';
 export * from './generated/endpoints/carriers/carriers';
 export * from './generated/endpoints/trips/trips';
+export { list as listVehicles } from './generated/endpoints/vehicles/vehicles';
+export type { VehicleResponse } from './generated/model/vehicleResponse';
 export * from './generated/endpoints/announcements/announcements';
 export * from './generated/endpoints/dispatcher/dispatcher';
 export * from './admin-catalog';

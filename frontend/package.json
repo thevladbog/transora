@@ -10,7 +10,7 @@
     "dev": "pnpm --filter @transora/admin dev",
     "build": "pnpm --filter @transora/admin build",
     "api:fetch": "curl -sf http://localhost:8080/v3/api-docs -o openapi/transora.openapi.json",
-    "api:generate": "node ./node_modules/orval/dist/bin/orval.js --config packages/api-client/orval.config.ts",
+    "api:generate": "pnpm exec orval --config packages/api-client/orval.config.ts",
     "api:sync": "pnpm api:fetch && pnpm api:generate"
   },
   "devDependencies": {

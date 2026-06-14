@@ -2,6 +2,7 @@ package ru.transora.app.scheduling
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import io.swagger.v3.oas.annotations.media.Schema
 import ru.transora.app.domain.DomainRuleViolation
 import ru.transora.app.iam.security.currentPrincipal
 import ru.transora.app.sales.TicketRepository
@@ -453,13 +454,19 @@ data class TripListFilter(
     val limit: Int = 100,
 )
 
+@Schema(requiredProperties = ["routeId", "tripDate", "departureTime"])
 data class CreateTripFromRouteRequest(
     val routeId: UUID,
     val tripDate: LocalDate,
+    @field:Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     val tripNumber: String? = null,
     val departureTime: LocalTime,
+    @field:Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     val vehicleId: UUID? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     val driverId: UUID? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     val platform: String? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     val openSales: Boolean? = null,
 )

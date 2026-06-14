@@ -20,8 +20,19 @@ async function executeRequest<T>(
   });
 
   if (!response.ok) {
-    const error = new Error(`HTTP ${response.status}`) as Error & { status: number };
+    let detail: string | undefined;
+    const text = await response.text();
+    if (text) {
+      try {
+        const body = JSON.parse(text) as { detail?: string };
+        detail = body.detail;
+      } catch {
+        // ignore non-JSON bodies
+      }
+    }
+    const error = new Error(detail ?? `HTTP ${response.status}`) as Error & { status: number; detail?: string };
     error.status = response.status;
+    error.detail = detail;
     throw error;
   }
 

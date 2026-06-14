@@ -9,10 +9,15 @@
 export interface CreateTripFromRouteRequest {
   routeId: string;
   tripDate: string;
-  tripNumber: string;
+  /** @nullable */
+  tripNumber?: string | null;
   departureTime: string;
-  vehicleId?: string;
-  driverId?: string;
-  platform?: string;
-  openSales: boolean;
+  /** @nullable */
+  vehicleId?: string | null;
+  /** @nullable */
+  driverId?: string | null;
+  /** @nullable */
+  platform?: string | null;
+  /** @nullable */
+  openSales?: boolean | null;
 }

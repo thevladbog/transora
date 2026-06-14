@@ -1,12 +1,15 @@
-import { useMemo } from 'react';
-import { Chip } from '@heroui/react';
+import { useMemo, useState } from 'react';
+import { Button, Chip } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Link, useNavigate, useParams } from 'react-router';
+import { PermissionGate } from '@/components/layout/PermissionGate';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { QueryState } from '@/components/ui/QueryState';
+import { CreateTripFromRouteDrawer } from '@/features/trips/CreateTripFromRouteDrawer';
 import { RoutePoliciesEditor } from '@/features/tariff-profiles/RoutePoliciesEditor';
 import { TariffMatrixGrid } from '@/features/tariff-profiles/TariffMatrixGrid';
+import { Permissions } from '@/lib/permissions';
 import { useRoutePricing, useUpsertRouteMatrix } from './api/hooks';
 import { RouteMetaSection } from './RouteMetaSection';
 import { RouteStopsEditor } from './RouteStopsEditor';
@@ -23,9 +26,12 @@ export function RouteEditorPage() {
   const { routeId = '' } = useParams();
   const navigate = useNavigate();
   const isNew = routeId === 'new';
-  const { t } = useTranslation(['routes', 'common']);
+  const { t } = useTranslation(['routes', 'common', 'trips']);
   const { data: bundle, isLoading, isError, refetch } = useRoutePricing(isNew ? '' : routeId);
   const upsertMatrix = useUpsertRouteMatrix(isNew ? '' : routeId);
+  const [createTripOpen, setCreateTripOpen] = useState(false);
+
+  const canCreateTrip = !isNew && (bundle?.stops.length ?? 0) >= 2;
 
   const matrixStops = useMemo(
     () =>
@@ -52,13 +58,29 @@ export function RouteEditorPage() {
         title={title}
         description={isNew ? t('routes:editorDescription') : undefined}
         actions={
-          <Link
-            to="/routes"
-            className="inline-flex items-center rounded-lg border border-border px-3 py-2 text-sm hover:bg-default"
-          >
-            {t('routes:backToList')}
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            {canCreateTrip ? (
+              <PermissionGate permission={Permissions.SCHEDULE_CREATE}>
+                <Button variant="primary" onPress={() => setCreateTripOpen(true)}>
+                  {t('trips:createTrip')}
+                </Button>
+              </PermissionGate>
+            ) : null}
+            <Link
+              to="/routes"
+              className="inline-flex items-center rounded-lg border border-border px-3 py-2 text-sm hover:bg-default"
+            >
+              {t('routes:backToList')}
+            </Link>
+          </div>
         }
+      />
+
+      <CreateTripFromRouteDrawer
+        isOpen={createTripOpen}
+        onOpenChange={setCreateTripOpen}
+        routeId={canCreateTrip ? routeId : undefined}
+        defaultTripNumber={bundle?.routeNumber}
       />
 
       <RouteMetaSection

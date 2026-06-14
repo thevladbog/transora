@@ -1,10 +1,25 @@
 {
   "title": "Trips",
-  "description": "Schedule for the current branch",
+  "description": "Trip schedule for the current station branch",
   "route": "Route",
   "departure": "Departure",
   "status": "Status",
   "platform": "Platform",
   "loadError": "Failed to load trips",
-  "empty": "No trips in the selected window"
+  "empty": "No trips in the selected window",
+  "createTrip": "Create trip",
+  "createTripTitle": "Create trip from route",
+  "createTripDescription": "One-off trip from a route template with stops and tariff matrix.",
+  "tripDate": "Trip date",
+  "departureTime": "Departure time",
+  "tripNumber": "Trip number",
+  "tripNumberHint": "If empty, the route number is used ({{routeNumber}}).",
+  "openSales": "Open sales",
+  "vehicle": "Vehicle",
+  "selectRoute": "Select a route",
+  "pastDate": "Trip date cannot be in the past",
+  "needsVehicle": "Select a vehicle to open sales",
+  "needsStops": "Route must have at least two stops",
+  "createError": "Failed to create trip",
+  "createSuccess": "Trip created"
 }
