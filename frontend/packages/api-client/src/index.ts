@@ -13,6 +13,11 @@ export {
   get6 as getSchedule,
   update7 as updateSchedule,
 } from './generated/endpoints/schedules/schedules';
+export {
+  list1 as listTrips,
+  get4 as getTrip,
+  update4 as updateTrip,
+} from './generated/endpoints/trips/trips';
 export { list as listVehicles } from './generated/endpoints/vehicles/vehicles';
 export type { VehicleResponse } from './generated/model/vehicleResponse';
 export * from './generated/endpoints/announcements/announcements';

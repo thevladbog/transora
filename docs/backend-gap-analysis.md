@@ -202,6 +202,7 @@ flowchart TB
 | Station settings / operational config | **Нет** |
 | Spravochniki beyond tariffs & refund policies | **Частично.** Unified route editor (`/api/admin/route-pricing`, admin `/routes`) — code, name, stops, matrix, policies, OSRM km; legacy `/api/admin/tariff-profiles` API остаётся |
 | Schedules admin UI | **Реализовано.** Network admin `/schedules` — list, create/edit templates, generate trips dialog |
+| Station trips ops UI | **Реализовано.** Station admin `/trips` — list, detail drawer, PATCH status/platform/delay/vehicle |
 
 **Есть:** station revenue, passenger flow, audit log, tariff/refund CRUD, **route pricing admin** (V27 `route_number` internal, `route_stops.point_id`), network admin UI `/routes` + `/schedules` (tariff-profiles UI redirect → `/routes`). Route editor UI: code + name only; trip numbers in schedule entries.
 
